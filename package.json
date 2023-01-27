@@ -1,0 +1,35 @@
+{
+  "name": "geo-location-backend",
+  "version": "1.0.0",
+  "description": "geo location attendence app for university",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js",
+    "start:dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rajeev-dh/geo-location-backend.git"
+  },
+  "keywords": [
+    "mongodb",
+    "nodejs",
+    "express"
+  ],
+  "author": "Rajeev Sahu",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "formidable": "^2.1.1",
+    "google-auth-library": "^8.7.0",
+    "joi": "^17.7.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.7.5",
+    "nodemailer": "^6.8.0",
+    "xlsx": "^0.18.5"
+  }
+}
