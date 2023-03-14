@@ -6,14 +6,13 @@ const userSchema = new Schema(
   {
     name: {
       type: String,
-      required: true,
-      required: "Name is required",
+      required: [true, "Name is required"],
+      minlength: 3,
     },
     email: {
       type: String,
-      required: true,
+      required: [true, "Your email is required"],
       unique: true,
-      required: "Your email is required",
       trim: true,
     },
     gId: {

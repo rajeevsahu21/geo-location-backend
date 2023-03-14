@@ -6,11 +6,11 @@ const courseSchema = new Schema(
   {
     courseName: {
       type: String,
-      required: true,
+      required: [true, "Course Name is required"],
     },
     courseCode: {
       type: String,
-      required: true,
+      required: [true, "Course Code is Required"],
       unique: true,
     },
     teacher: {

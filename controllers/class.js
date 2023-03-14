@@ -104,7 +104,7 @@ const markAttendance = async (req, res) => {
         .json({ error: true, message: "You are too far from class" });
     }
     await Class.findByIdAndUpdate(classId, {
-      $push: { students: studentId },
+      $addToSet: { students: studentId },
     });
     res.status(200).json({
       error: false,

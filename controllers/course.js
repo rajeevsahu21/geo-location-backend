@@ -71,7 +71,7 @@ const enrollCourse = async (req, res) => {
         .json({ error: true, message: "Student already enrolled" });
     const enrolledCourse = await Course.findOneAndUpdate(
       { courseCode },
-      { $push: { students: studentId } },
+      { $addToSet: { students: studentId } },
       { new: true }
     );
     res.status(200).json({
