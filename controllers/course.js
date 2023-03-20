@@ -12,7 +12,7 @@ const createCourse = async (req, res) => {
       return res
         .status(400)
         .json({ error: true, message: "Please Enter Course Name" });
-    const courseName = req.body.courseName.replace(/\s/g, "");
+    const courseName = req.body.courseName;
     const courseCode = generateCourseCode(6);
     const newCourse = await new Course({
       courseName,

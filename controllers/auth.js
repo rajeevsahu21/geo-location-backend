@@ -62,6 +62,10 @@ const signUp = async (req, res) => {
         .status(400)
         .json({ error: true, message: error.details[0].message });
     const email = req.body.email.replace(/\s/g, "").toLowerCase();
+    if (!/[a-zA-Z0-9+_.-]+@gkv.ac.in/.test(email))
+      return res
+        .status(400)
+        .json({ error: true, message: "Please use GKV mail" });
     req.body = { ...req.body, email };
 
     const oldUser = await User.findOne({ email });
