@@ -4,10 +4,6 @@ const Schema = mongoose.Schema;
 
 const classSchema = new Schema(
   {
-    createdDate: {
-      type: Date,
-      required: true,
-    },
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",

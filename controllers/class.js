@@ -19,8 +19,8 @@ const startClass = async (req, res) => {
       courseId,
       location,
       radius,
-      createdDate: new Date(),
     }).save();
+    closeClass(courseId);
     await Course.updateOne({ _id: courseId }, { activeClass: true, radius });
     res.status(201).json({
       error: false,
@@ -127,7 +127,7 @@ const getClassesByCourseId = async (req, res) => {
       req.user.role === "student"
         ? { students: req.user._id, courseId }
         : { courseId };
-    const classes = await Class.find(query).sort({ createdDate: -1 });
+    const classes = await Class.find(query).sort({ createdAt: -1 });
     res.status(200).json({
       error: false,
       data: classes,
@@ -216,4 +216,15 @@ const calculateDistance = (lat1, lat2, lon1, lon2) => {
 
   // calculate the result in meter
   return c * r * 1000;
+};
+
+const closeClass = (courseId) => {
+  try {
+    setTimeout(async () => {
+      await Class.updateOne({ courseId, active: true }, { active: false });
+      await Course.updateOne({ _id: courseId }, { activeClass: false });
+    }, 600000);
+  } catch (err) {
+    console.error(err);
+  }
 };

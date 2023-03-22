@@ -171,7 +171,7 @@ const sendAttendanceViaEmail = async (req, res) => {
       return res.status(404).json({ error: true, message: "No Classes found" });
     const courseName = course.courseName;
     const classesDates = classes.map((cls) =>
-      cls.createdDate.toLocaleDateString("pt-PT")
+      cls.createdAt.toLocaleDateString("pt-PT")
     );
     const workSheetColumnName = [
       "Registration No",
