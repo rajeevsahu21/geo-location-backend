@@ -5,8 +5,6 @@ const signUpBodyValidation = (body) => {
     name: Joi.string().required().label("Name"),
     email: Joi.string().email().required().label("Email"),
     password: Joi.string().min(6).required().label("Password"),
-    role: Joi.string().required().label("Role"),
-    registrationNo: Joi.string().min(0).label("Registration No"),
   });
   return schema.validate(body);
 };

@@ -66,14 +66,16 @@ const signUp = async (req, res) => {
       return res
         .status(400)
         .json({ error: true, message: "Please use GKV mail" });
-    req.body = { ...req.body, email };
-
+    const role = /^\d[1-9]([0-9]{1,9}@gkv.ac.in$)/.test(email)
+      ? "student"
+      : "teacher";
+    const registrationNo = role === "student" ? email.substring(0, 9) : null;
     const oldUser = await User.findOne({ email });
     if (oldUser)
       return res
         .status(409)
         .json({ error: true, message: "User with given email already exist" });
-
+    req.body = { ...req.body, email, role, registrationNo };
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(req.body.password, salt);
 
