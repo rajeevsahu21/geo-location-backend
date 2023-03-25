@@ -31,6 +31,13 @@ const login = async (req, res) => {
         message: `You signed up with Google. Please login using Google or continue using forgot Password`,
       });
 
+    if (user.status != "active") {
+      return res.status(401).send({
+        error: true,
+        message: "Pending Account. Please Verify Your Email!",
+      });
+    }
+
     const verifiedPassword = await bcrypt.compare(
       req.body.password,
       user.password
@@ -75,18 +82,34 @@ const signUp = async (req, res) => {
       return res
         .status(409)
         .json({ error: true, message: "User with given email already exist" });
-    req.body = { ...req.body, email, role, registrationNo };
+    const name = req.body.name.trim();
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(req.body.password, salt);
 
-    const user = await new User({ ...req.body, password: hashPassword }).save();
-    const token = await generateToken(user);
+    const confirmationCode = crypto.randomBytes(25).toString("hex");
+    const user = await User.create({
+      name,
+      email,
+      registrationNo,
+      role,
+      password: hashPassword,
+      confirmationCode,
+    });
+    const mailOptions = {
+      from: `"no-reply" ${process.env.SMTP_USER_NAME}`,
+      to: email,
+      subject: "Please confirm your account",
+      html: `<h1>Email Confirmation</h1>
+      <h2>Hello ${name}</h2>
+      <p>Thank you for subscribing. Please confirm your email by clicking on the following link</p>
+      <a href=https://${process.env.HOST}/api/auth/confirm/${confirmationCode}> Click here</a>
+      </div>`,
+    };
+    sendEmail(mailOptions);
 
     res.status(201).json({
       error: false,
-      token,
-      user,
-      message: "Account created sucessfully",
+      message: "User was registered successfully! Please check your email",
     });
   } catch (err) {
     console.log(err);
@@ -126,10 +149,14 @@ const authWithGoogle = async (req, res) => {
           gId,
           profileImage,
           role,
+          status: "active",
           registrationNo,
         }).save();
       } else if (!user.gId) {
-        await User.updateOne({ email }, { gId, profileImage });
+        await User.updateOne(
+          { email },
+          { gId, profileImage, status: "active" }
+        );
       }
       const token = await generateToken(user);
       res.status(200).json({
@@ -170,10 +197,11 @@ const authWithGoogleForApp = async (req, res) => {
         gId,
         profileImage,
         role,
+        status: "active",
         registrationNo,
       }).save();
     } else if (!user.gId) {
-      await User.updateOne({ email }, { gId, profileImage });
+      await User.updateOne({ email }, { gId, profileImage, status: "active" });
     }
     const token = await generateToken(user);
     res.status(200).json({
@@ -182,6 +210,22 @@ const authWithGoogleForApp = async (req, res) => {
       user,
       message: "User Authenticated sucessfully",
     });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: true, message: "Internal Server Error" });
+  }
+};
+
+const confirmAccount = async (req, res) => {
+  try {
+    const user = await User.findOneAndUpdate(
+      {
+        confirmationCode: req.params.token,
+      },
+      { status: "active" }
+    );
+    if (!user) return res.send("User Not Found");
+    res.send("Account confirmed");
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: true, message: "Internal Server Error" });
@@ -201,8 +245,7 @@ const recover = async (req, res) => {
       {
         resetPasswordToken: crypto.randomBytes(20).toString("hex"),
         resetPasswordExpires: Date.now() + 3600000,
-      },
-      { new: true }
+      }
     );
     if (!user)
       return res
@@ -283,6 +326,7 @@ export {
   signUp,
   authWithGoogle,
   authWithGoogleForApp,
+  confirmAccount,
   recover,
   reset,
   resetPassword,

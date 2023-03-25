@@ -68,13 +68,17 @@ passport.use(
             gId,
             profileImage,
             role,
+            status: "active",
             registrationNo,
           };
           const newUser = await User.create(userData);
           user = newUser;
         } else {
           if (!existingUser.gId) {
-            await User.updateOne({ email }, { gId, profileImage });
+            await User.updateOne(
+              { email },
+              { gId, profileImage, status: "active" }
+            );
           }
           user = existingUser;
         }

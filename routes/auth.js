@@ -1,15 +1,16 @@
 import { Router } from "express";
 import passport from "passport";
-import { generateToken } from "../controllers/auth.js";
 
 import {
   login,
   signUp,
+  confirmAccount,
   recover,
   reset,
   resetPassword,
   authWithGoogle,
   authWithGoogleForApp,
+  generateToken,
 } from "../controllers/auth.js";
 
 const router = Router();
@@ -44,6 +45,7 @@ router.get(
     res.redirect("/auth/google");
   }
 );
+router.get("/api/auth/confirm/:token", confirmAccount);
 router.post("/api/auth/recover", recover);
 router.get("/api/auth/reset/:token", reset);
 router.post("/api/auth/reset/:token", resetPassword);

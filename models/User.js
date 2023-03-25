@@ -35,6 +35,15 @@ const userSchema = new Schema(
       enum: ["student", "teacher"],
       default: ["student"],
     },
+    status: {
+      type: String,
+      enum: ["pending", "active"],
+      default: "pending",
+    },
+    confirmationCode: {
+      type: String,
+      unique: true,
+    },
     resetPasswordToken: {
       type: String,
     },
