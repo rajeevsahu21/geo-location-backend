@@ -284,6 +284,7 @@ export {
   recover,
   reset,
   resetPassword,
+  generateToken,
 };
 
 const generateToken = async (user) => {
