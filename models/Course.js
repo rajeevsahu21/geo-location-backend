@@ -7,6 +7,7 @@ const courseSchema = new Schema(
     courseName: {
       type: String,
       required: [true, "Course Name is required"],
+      trim: true,
     },
     courseCode: {
       type: String,

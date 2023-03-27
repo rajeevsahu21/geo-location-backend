@@ -2,7 +2,7 @@ import Joi from "joi";
 
 const signUpBodyValidation = (body) => {
   const schema = Joi.object({
-    name: Joi.string().required().label("Name"),
+    name: Joi.string().min(3).required().label("Name"),
     email: Joi.string().email().required().label("Email"),
     password: Joi.string().min(6).required().label("Password"),
   });

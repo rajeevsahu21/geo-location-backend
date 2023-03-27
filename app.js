@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.js";
 import authMiddleWare from "./middleware/auth.js";
 import classRoutes from "./routes/class.js";
 import courseRoutes from "./routes/course.js";
+import userRoutes from "./routes/user.js";
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use("/", authRoutes);
 app.use(authMiddleWare);
 app.use("/api", classRoutes);
 app.use("/api", courseRoutes);
+app.use("/api/user", userRoutes);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Server Listening on port ${port}...`));
