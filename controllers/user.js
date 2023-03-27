@@ -6,7 +6,7 @@ const getUser = async (req, res) => {
     res.status(200).json({
       error: false,
       data: user,
-      message: "User Profile Updated successfully",
+      message: "User Found",
     });
   } catch (err) {
     console.log(err);

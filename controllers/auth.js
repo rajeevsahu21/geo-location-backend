@@ -240,10 +240,11 @@ const recover = async (req, res) => {
     return res.status(400).json({ error: true, message: "Email is missing" });
   const email = req.body.email.replace(/\s/g, "").toLowerCase();
   try {
+    const resetPasswordToken = crypto.randomBytes(20).toString("hex");
     const user = await User.findOneAndUpdate(
       { email },
       {
-        resetPasswordToken: crypto.randomBytes(20).toString("hex"),
+        resetPasswordToken,
         resetPasswordExpires: Date.now() + 3600000,
       }
     );
@@ -251,7 +252,7 @@ const recover = async (req, res) => {
       return res
         .status(401)
         .json({ error: true, message: "No User found with given email" });
-    let link = `https://${process.env.HOST}/api/auth/reset/${user.resetPasswordToken}`;
+    let link = `https://${process.env.HOST}/api/auth/reset/${resetPasswordToken}`;
     const mailOptions = {
       from: `"no-reply" ${process.env.SMTP_USER_NAME}`,
       to: user.email,
