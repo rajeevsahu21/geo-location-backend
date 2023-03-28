@@ -5,6 +5,7 @@ import Class from "../models/Class.js";
 import Course from "../models/Course.js";
 import { exportToExcel, readExcel } from "../utils/genrateExcel.js";
 import sendEmail from "../utils/sendEmail.js";
+import Message from "../models/message.js";
 
 const createCourse = async (req, res) => {
   try {
@@ -143,6 +144,7 @@ const deleteCourseById = async (req, res) => {
     if (!deletedCourse)
       return res.status(404).json({ error: true, message: "Course not found" });
     await Class.deleteMany({ courseId });
+    await Message.deleteMany({ courseId });
     res
       .status(200)
       .json({ error: false, message: "Course deleted successfully" });

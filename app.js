@@ -10,6 +10,7 @@ import authMiddleWare from "./middleware/auth.js";
 import classRoutes from "./routes/class.js";
 import courseRoutes from "./routes/course.js";
 import userRoutes from "./routes/user.js";
+import messageRoutes from "./routes/message.js";
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use(authMiddleWare);
 app.use("/api", classRoutes);
 app.use("/api", courseRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/message", messageRoutes);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Server Listening on port ${port}...`));
@@ -57,6 +59,7 @@ passport.use(
         const email = profile.emails[0].value;
         const gId = profile.id;
         const profileImage = profile.photos[0].value;
+        const name = profile.displayName;
         const existingUser = await User.findOne({ email });
         if (!existingUser) {
           const role = /^\d[1-9]([0-9]{1,9}@gkv.ac.in$)/.test(email)
@@ -65,7 +68,7 @@ passport.use(
           const registrationNo =
             role === "student" ? email.substring(0, 9) : null;
           const userData = {
-            name: profile.displayName,
+            name,
             email,
             gId,
             profileImage,
@@ -79,7 +82,7 @@ passport.use(
           if (!existingUser.gId) {
             await User.updateOne(
               { email },
-              { gId, profileImage, status: "active" }
+              { name, gId, profileImage, status: "active" }
             );
           }
           user = existingUser;

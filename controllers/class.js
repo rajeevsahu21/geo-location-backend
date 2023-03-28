@@ -2,14 +2,20 @@ import mongoose from "mongoose";
 
 import Class from "../models/Class.js";
 import Course from "../models/Course.js";
+import { sendPushNotification } from "../utils/sendNotification.js";
 
 const startClass = async (req, res) => {
   try {
     const { courseId, location, radius } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(courseId))
+    if (
+      !radius ||
+      !location.latitude ||
+      !location.longitude ||
+      !mongoose.Types.ObjectId.isValid(courseId)
+    )
       return res
         .status(400)
-        .json({ error: true, message: "Course Id is not valid" });
+        .json({ error: true, message: "Required field is missing" });
     const runningClass = await Class.findOne({ courseId, active: true });
     if (runningClass)
       return res
@@ -21,6 +27,7 @@ const startClass = async (req, res) => {
       radius,
     }).save();
     closeClass(courseId);
+    sendPushNotification("New class Started", "Mark your Attendance", courseId);
     await Course.updateOne({ _id: courseId }, { activeClass: true, radius });
     res.status(201).json({
       error: false,
@@ -62,10 +69,14 @@ const dismissClass = async (req, res) => {
 const markAttendance = async (req, res) => {
   try {
     const { courseId, location } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(courseId))
+    if (
+      !location.longitude ||
+      !location.latitude ||
+      !mongoose.Types.ObjectId.isValid(courseId)
+    )
       return res
         .status(400)
-        .json({ error: true, message: "Course Id is not valid" });
+        .json({ error: true, message: "Required field is missing" });
     const studentId = req.user._id;
     const runningClass = await Class.findOne({ courseId, active: true });
     if (!runningClass)

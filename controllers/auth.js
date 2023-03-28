@@ -101,7 +101,7 @@ const signUp = async (req, res) => {
       subject: "Please confirm your account",
       html: `<h1>Email Confirmation</h1>
       <h2>Hello ${name}</h2>
-      <p>Thank you for subscribing. Please confirm your email by clicking on the following link</p>
+      <p>Thank you for part of the GKV. Please confirm your email by clicking on the following link</p>
       <a href=https://${process.env.HOST}/api/auth/confirm/${confirmationCode}> Click here</a>
       </div>`,
     };
@@ -155,7 +155,7 @@ const authWithGoogle = async (req, res) => {
       } else if (!user.gId) {
         await User.updateOne(
           { email },
-          { gId, profileImage, status: "active" }
+          { name, gId, profileImage, status: "active" }
         );
       }
       const token = await generateToken(user);
@@ -201,7 +201,10 @@ const authWithGoogleForApp = async (req, res) => {
         registrationNo,
       }).save();
     } else if (!user.gId) {
-      await User.updateOne({ email }, { gId, profileImage, status: "active" });
+      await User.updateOne(
+        { email },
+        { name, gId, profileImage, status: "active" }
+      );
     }
     const token = await generateToken(user);
     res.status(200).json({

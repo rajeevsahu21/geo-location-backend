@@ -41,6 +41,10 @@ const userSchema = new Schema(
       enum: ["pending", "active"],
       default: "pending",
     },
+    token: {
+      type: String,
+      max: 255,
+    },
     confirmationCode: {
       type: String,
       unique: true,
