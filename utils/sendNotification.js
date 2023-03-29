@@ -1,3 +1,5 @@
+import fetch from "node-fetch";
+
 import Course from "../models/Course.js";
 import User from "../models/User.js";
 
