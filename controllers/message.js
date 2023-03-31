@@ -55,9 +55,7 @@ const getMessages = async (req, res) => {
     };
     if (courseId) query.courseId = courseId;
     const total = await Message.countDocuments(query);
-    const messages = await Message.find(query, { title: 1, message: 1 })
-      .skip(skip)
-      .limit(limit);
+    const messages = await Message.find(query).skip(skip).limit(limit);
     res.status(200).json({
       total,
       pageCount: Math.ceil(total / limit),
