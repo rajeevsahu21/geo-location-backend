@@ -172,6 +172,45 @@ const getClassesByCourseId = async (req, res) => {
   }
 };
 
+const getClass = async (req, res) => {
+  try {
+    const { classId } = req.query;
+    if (!mongoose.Types.ObjectId.isValid(classId))
+      return res
+        .status(400)
+        .json({ error: true, message: "Class Id is not valid" });
+    const foundClass = await Class.findById(classId).lean();
+    if (!foundClass)
+      return res.status(404).json({
+        error: true,
+        message: "Class not found",
+      });
+    const course = await Course.findById(foundClass.courseId)
+      .populate("students", "registrationNo name")
+      .lean();
+    const courseStudent = course.students;
+    const classStudent = foundClass.students.map((item) => item.toString());
+    let attendance = [];
+    for (let i = 0; i < courseStudent.length; i++) {
+      const student = { ...courseStudent[i] };
+      if (classStudent.includes(courseStudent[i]._id.toString())) {
+        student.present = true;
+      } else {
+        student.present = false;
+      }
+      attendance.push(student);
+    }
+    res.status(200).json({
+      error: false,
+      data: attendance,
+      message: "Student Attendance found",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: true, message: "Internal Server Error" });
+  }
+};
+
 const getClassById = async (req, res) => {
   try {
     const { classId } = req.query;
@@ -224,6 +263,7 @@ export {
   dismissClass,
   markAttendance,
   getClassesByCourseId,
+  getClass,
   getClassById,
   deleteClassById,
 };

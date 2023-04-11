@@ -21,7 +21,7 @@ const classSchema = new Schema(
     },
     radius: {
       type: Number,
-      default: 25,
+      default: 50,
     },
     students: [
       {

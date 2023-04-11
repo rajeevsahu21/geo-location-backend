@@ -27,7 +27,7 @@ const courseSchema = new Schema(
     ],
     radius: {
       type: Number,
-      default: 25,
+      default: 50,
     },
     activeClass: {
       type: Boolean,

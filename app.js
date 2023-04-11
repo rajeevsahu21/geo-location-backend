@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import cors from "cors";
 import session from "express-session";
 import passport from "passport";
+import { createRequire } from "node:module";
 
 import dbConnect from "./config/dbConnect.js";
 import authRoutes from "./routes/auth.js";
@@ -11,6 +12,9 @@ import classRoutes from "./routes/class.js";
 import courseRoutes from "./routes/course.js";
 import userRoutes from "./routes/user.js";
 import messageRoutes from "./routes/message.js";
+
+const require = createRequire(import.meta.url);
+const { version } = require("./package.json");
 
 const app = express();
 
@@ -31,7 +35,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "API is working" });
+  res.status(200).json({ error: false, message: "API is working", version });
 });
 app.use("/", authRoutes);
 app.use(authMiddleWare);
