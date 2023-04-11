@@ -73,9 +73,7 @@ const signUp = async (req, res) => {
       return res
         .status(400)
         .json({ error: true, message: "Please use GKV mail" });
-    const role = /^\d[1-9]([0-9]{1,9}@gkv.ac.in$)/.test(email)
-      ? "student"
-      : "teacher";
+    const role = /^\d{9}@gkv\.ac\.in$/.test(email) ? "student" : "teacher";
     const registrationNo = role === "student" ? email.substring(0, 9) : null;
     const oldUser = await User.findOne({ email });
     if (oldUser)
@@ -133,9 +131,7 @@ const authWithGoogle = async (req, res) => {
         return res
           .status(400)
           .json({ error: true, message: "Please use GKV mail" });
-      const role = /^\d[1-9]([0-9]{1,9}@gkv.ac.in$)/.test(email)
-        ? "student"
-        : "teacher";
+      const role = /^\d{9}@gkv\.ac\.in$/.test(email) ? "student" : "teacher";
       const registrationNo = role === "student" ? email.substring(0, 9) : null;
       const name = profile.name;
       const gId = profile.sub;
@@ -184,9 +180,7 @@ const authWithGoogleForApp = async (req, res) => {
       return res
         .status(400)
         .json({ error: true, message: "Please use GKV mail" });
-    const role = /^\d[1-9]([0-9]{1,9}@gkv.ac.in$)/.test(email)
-      ? "student"
-      : "teacher";
+    const role = /^\d{9}@gkv\.ac\.in$/.test(email) ? "student" : "teacher";
     const registrationNo = role === "student" ? email.substr(0, 9) : null;
     let user = await User.findOne({ email });
 
