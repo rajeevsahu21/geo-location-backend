@@ -14,7 +14,7 @@ const addMessage = async (req, res) => {
     res.status(201).json({
       data: newMessage,
       error: false,
-      message: "Message created successfully",
+      message: "Message Send successfully",
     });
     sendPushNotification(title, message, courseId);
   } catch (err) {

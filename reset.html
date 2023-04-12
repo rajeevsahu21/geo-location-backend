@@ -1,102 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="data:," />
-    <title>Reset Password</title>
-    <style>
-      body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      .outerContainer {
-        width: 95vw;
-        height: 95vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .container {
-        height: 50vh;
-        width: 25vw;
-        padding: 5%;
-        border-radius: 1rem;
-        display: flex;
-        flex-direction: column;
-        border: 0.1rem solid rgba(0, 0, 0, 0.5);
-      }
-      .password {
-        padding-left: 3%;
-        height: 30%;
-        width: 95%;
-        margin-top: 3%;
-        font-weight: 600;
-        border-radius: 1rem;
-        border: 0.1rem solid rgba(128, 128, 128, 0.5);
-        box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.5);
-      }
-      .reset-btn {
-        height: 10%;
-        width: 100%;
-        margin-top: 20%;
-        border-radius: 1rem;
-        background-color: #6d67e4;
-        box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.5);
-        border: none;
-        font-weight: 600;
-        font-size: 1em;
-        color: white;
-      }
-      .h3 {
-        font-weight: 1000;
-        font-size: large;
-      }
-      @media screen and (max-width: 1024px) {
-        .container {
-          width: 70vw;
-        }
-      }
-      @media screen and (max-width: 600px) {
-        .container {
-          width: 90vw;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="outerContainer">
-      <form method="POST">
-        <div class="container">
-          <div>
-            <p class="h3">Create New Password</p>
-            <p>This password should be different from the previous password</p>
-          </div>
-          <div>
-            <input
-              class="password"
-              type="password"
-              name="password"
-              placeholder="New Password"
-              required
-            /><br />
-            <input
-              class="password"
-              type="text"
-              name="pass"
-              placeholder="Confirm Password"
-              required
-            /><br />
-            <p>Both passwords must match.</p>
-          </div>
-          <input class="reset-btn" type="submit" value="Reset Password" />
-        </div>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Password</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather&family=Montserrat&family=Roboto&display=swap"
+    rel="stylesheet">
+
+</head>
+
+<body>
+  <div style="display: flex;align-items: center;justify-content: center;">
+    <div style="width: 350px">
+      <header
+        style="display: flex; flex-direction: row; align-items: center; border-bottom: solid #A5D7E8; border-width: thin;">
+        <img
+          src="https://play-lh.googleusercontent.com/asrfS4x89LkxFILsB4rYxFmX7n0K61MM0QEHpQ7GMlzfekHIeNLHxlP5dEbt1SstnFU=w240-h480"
+          width="60px" height="50px" alt="GKV" />
+        <p style="font-family: Merriweather; color: #002B5B; margin-left: 20px; font-weight: 600;">GKV<span>
+            App</span></p>
+      </header>
+      <br />
+      <form method="post">
+        <h3 style="font-weight: 600;"><em>Create a new password</em></h3>
+        <p style="font-size: 14px;">Create a password with at least 6 letters.</p>
+        <p style="font-size: 14px;">You'll need this password to log into your account.</p>
+        <br />
+        <input type="password" id="password" placeholder="New password"
+          style="height: 35px; width: 300px; outline: none;" required /><br /><br />
+        <input type="text" id="confirm_password" placeholder="Confirm password"
+          style="height: 35px; width: 300px; outline: none;" required />
+        <br />
+        <button type="submit"
+          style="background-color: #3E54AC; border: none; color: white; margin-top: 1.2em; height: 45px;width: 308px; border-radius: 5px; font-size: medium;cursor: pointer;">
+          Reset Password</button>
       </form>
     </div>
-  </body>
+  </div>
+  <script>
+    const password = document.getElementById("password")
+    const confirm_password = document.getElementById("confirm_password");
+    function validatePassword() {
+      if (password.value != confirm_password.value) {
+        confirm_password.setCustomValidity("Passwords must be Same");
+      } else {
+        confirm_password.setCustomValidity('');
+      }
+    }
+    password.onchange = validatePassword;
+    confirm_password.onkeyup = validatePassword;
+  </script>
+</body>
+
 </html>
