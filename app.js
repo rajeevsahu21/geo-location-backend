@@ -34,7 +34,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.status(200).json({ error: false, message: "API is working", version });
 });
 app.use("/", authRoutes);

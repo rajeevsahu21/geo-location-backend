@@ -1,6 +1,6 @@
 {
   "name": "geo-location-backend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "geo location attendence app for university",
   "main": "app.js",
   "type": "module",
