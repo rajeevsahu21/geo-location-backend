@@ -197,9 +197,59 @@ const sendAttendanceViaEmail = async (req, res) => {
     const mailOptions = {
       from: `"no-reply" ${process.env.SMTP_USER_NAME}`, // sender address
       to: course.teacher.email, // list of receivers
-      subject: "Course Attendance", // Subject line
-      text: `Complete Attendance for ${courseName}`, // plain text body
-      html: `<b>Complete Attendance for ${courseName}</b>`, // html body
+      subject: `Course Attendance for ${courseName}`, // Subject line
+      html: `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Course Attendance</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Merriweather&family=Montserrat&family=Roboto&display=swap"
+              rel="stylesheet">
+      </head>
+      <body style="display: flex;align-items: center;justify-content: center;">
+          <div style="display: flex;align-items: center;justify-content: center;">
+              <div style="width: 350px;">
+                  <header
+                      style="display: flex; flex-direction: row; align-items: center; border-bottom: solid #A5D7E8; border-width: thin;">
+                      <img src="https://play-lh.googleusercontent.com/asrfS4x89LkxFILsB4rYxFmX7n0K61MM0QEHpQ7GMlzfekHIeNLHxlP5dEbt1SstnFU=w240-h480"
+                          width="60px" height="50px" alt="GKV" />
+                      <p style="font-family: Merriweather; color: #002B5B; margin-left: 20px;">GKV<span> App</span></p>
+                  </header>
+                  <br />
+                  <div style="text-align: center;">
+                      <div>
+                          <img src="https://png.pngtree.com/png-vector/20190726/ourmid/pngtree-package-pending-icon-for-your-project-png-image_1599195.jpg"
+                              width="120px">
+                      </div>
+                      <p style="font-weight: 600; text-align: left;">Complete Attendance for ${courseName}</p>
+                      <p style="text-align: left;">Please download the excel sheet down below to get the attendance list.</p>
+                  </div>
+                  <br />
+                  <div>
+                      <div style="display: flex; border-radius: 4px;">
+                          <div style="padding-left: 1%;">
+                              <P style="word-wrap: break-word; font-weight: 600;">Available on Playstore</P>
+                          </div>
+                          <a href='https://play.google.com/store/apps/details?id=com.gkv.gkvapp'
+                              style='cursor:pointer;display:block'><img
+                                  src='https://cdn.me-qr.com/qr/55920118.png?v=1681240451' style="overflow: hidden;"
+                                  width="160px" alt='Download app from Playstore'></a>
+                      </div>
+                  </div>
+                  <footer>
+                      <p style="font-size:small;">You have received this mail because your e-mail ID is registered with
+                          GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
+                  </footer>
+              </div>
+          </div>
+          </div>
+      </body>
+      </html>`,
       attachments: [
         {
           // filename and content type is derived from path
@@ -242,7 +292,65 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
         from: `"no-reply" ${process.env.SMTP_USER_NAME}`, // sender address
         to: emails, // list of receivers
         subject: `Course Invitation for ${course.courseName}`, // Subject line
-        html: `<p><b>${course.teacher.name}</b> sir invites you join the <b>${course.courseName}</b> course with this code <b>${course.courseCode}</b>. website link is https://gkv.netlify.app</p>`,
+        html: `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title></title>
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Merriweather&family=Montserrat&family=Roboto&display=swap"
+                rel="stylesheet">
+        </head>
+        <body style="display: flex;align-items: center;justify-content: center;">
+            <div style="display: flex;align-items: center;justify-content: center;">
+                <div style="width: 350px;">
+                    <header
+                        style="display: flex; flex-direction: row; align-items: center; border-bottom: solid #A5D7E8; border-width: thin;">
+                        <img src="https://play-lh.googleusercontent.com/asrfS4x89LkxFILsB4rYxFmX7n0K61MM0QEHpQ7GMlzfekHIeNLHxlP5dEbt1SstnFU=w240-h480"
+                            width="60px" height="50px" alt="GKV" />
+                        <p style="font-family: Merriweather; color: #002B5B; margin-left: 20px;">GKV<span> App</span></p>
+                    </header>
+                    <br />
+                    <div style="text-align: center;">
+                        <div>
+                            <img src="https://png.pngtree.com/png-vector/20190726/ourmid/pngtree-package-pending-icon-for-your-project-png-image_1599195.jpg"
+                                width="120px">
+                        </div>
+                        <p style="text-align: left;"><b>${course.teacher.name}</b> sir, invites you join the
+                          <b>${course.courseName}</b> course with this code <b>${course.courseCode}</b>.
+                        </p>
+                        <a href="https://play.google.com/store/apps/details?id=com.gkv.gkvapp" target="_blank">
+                            <button
+                                style="background: #5DA7DB; border: none; color: white; height: 40px; width: 280px; border-radius: 5px; font-weight: 800; font-size: medium;">
+                                Join class
+                            </button>
+                        </a>
+                    </div>
+                    <br />
+                    <div>
+                        <div style="display: flex; border-radius: 4px;">
+                            <div style="padding-left: 1%;">
+                                <P style="word-wrap: break-word; font-weight: 600;">Available on Playstore</P>
+                            </div>
+                            <a href='https://play.google.com/store/apps/details?id=com.gkv.gkvapp'
+                                style='cursor:pointer;display:block'><img
+                                    src='https://cdn.me-qr.com/qr/55920118.png?v=1681240451' style="overflow: hidden;"
+                                    width="160px" alt='Download app from Playstore'></a>
+                        </div>
+                    </div>
+                    <footer>
+                        <p style="font-size:small;">You have received this mail because your e-mail ID is registered with
+                            GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
+                    </footer>
+                </div>
+            </div>
+            </div>
+        </body>
+        </html>`,
       };
       sendEmail(mailOptions);
       res.status(200).json({ error: false, message: "Email sent to everyone" });
