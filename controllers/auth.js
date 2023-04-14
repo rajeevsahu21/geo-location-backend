@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import path from "path";
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
+import fetch from "node-fetch";
 
 import User from "../models/User.js";
 import {
@@ -34,7 +35,8 @@ const login = async (req, res) => {
     if (user.status != "active") {
       return res.status(401).send({
         error: true,
-        message: "Pending Account. Please Verify Your Email!",
+        message:
+          "Pending Account. Please Verify Your Email or Continue with Google",
       });
     }
 
@@ -170,6 +172,7 @@ const signUp = async (req, res) => {
 
 const authWithGoogle = async (req, res) => {
   try {
+    let profile;
     if (req.body.credential) {
       const verificationResponse = await verifyGoogleToken(req.body.credential);
       if (verificationResponse.error) {
@@ -178,43 +181,56 @@ const authWithGoogle = async (req, res) => {
           message: verificationResponse.error,
         });
       }
-      const profile = verificationResponse?.payload;
-      const email = profile.email;
-      if (!/[a-zA-Z0-9+_.-]+@gkv.ac.in/.test(email))
-        return res
-          .status(400)
-          .json({ error: true, message: "Please use GKV mail" });
-      const role = /^\d{9}@gkv\.ac\.in$/.test(email) ? "student" : "teacher";
-      const registrationNo = role === "student" ? email.substring(0, 9) : null;
-      const name = profile.name;
-      const gId = profile.sub;
-      const profileImage = profile.picture;
-      let user = await User.findOne({ email });
-
-      if (!user) {
-        user = await new User({
-          name,
-          email,
-          gId,
-          profileImage,
-          role,
-          status: "active",
-          registrationNo,
-        }).save();
-      } else if (!user.gId) {
-        await User.updateOne(
-          { email },
-          { name, gId, profileImage, status: "active" }
-        );
-      }
-      const token = await generateToken(user);
-      res.status(200).json({
-        error: false,
-        token,
-        user,
-        message: "User Authenticated sucessfully",
-      });
+      profile = verificationResponse?.payload;
+    } else {
+      const response = await fetch(
+        "https://www.googleapis.com/userinfo/v2/me",
+        {
+          headers: { Authorization: `Bearer ${req.body.userToken}` },
+        }
+      );
+      if (!response.ok)
+        return res.status(400).json({
+          error: true,
+          message: "Invalid user detected. Please try again",
+        });
+      profile = await response.json();
     }
+    const email = profile.email;
+    if (!/[a-zA-Z0-9+_.-]+@gkv.ac.in/.test(email))
+      return res
+        .status(400)
+        .json({ error: true, message: "Please use GKV mail" });
+    const role = /^\d{9}@gkv\.ac\.in$/.test(email) ? "student" : "teacher";
+    const registrationNo = role === "student" ? email.substring(0, 9) : null;
+    const name = profile.name;
+    const gId = profile.sub || profile.id;
+    const profileImage = profile.picture;
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await new User({
+        name,
+        email,
+        gId,
+        profileImage,
+        role,
+        status: "active",
+        registrationNo,
+      }).save();
+    } else if (!user.gId) {
+      await User.updateOne(
+        { email },
+        { name, gId, profileImage, status: "active" }
+      );
+    }
+    const token = await generateToken(user);
+    res.status(200).json({
+      error: false,
+      token,
+      user,
+      message: "User Authenticated sucessfully",
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: true, message: "Internal Server Error" });
@@ -292,6 +308,7 @@ const confirmAccount = async (req, res) => {
                     </div>
                     <h2>Something Went Wrong!</h2>
                     <p style="color: red;">User Not Found.</p>
+                    <p>Please register again or Continue with Google.</p>
                 </div>
             </div>
         </div>
@@ -314,6 +331,7 @@ const confirmAccount = async (req, res) => {
                     </div>
                     <h2>Successful!</h2>
                     <p style="color: green;">Your Account has been Verified!</p>
+                    <p>You are now able to Login.</p>
                 </div>
             </div>
         </div>
@@ -447,6 +465,7 @@ const reset = async (req, res) => {
                       </div>
                       <h2>Something Went Wrong!</h2>
                       <p style="color: red;">Password reset token is invalid or has expired.</p>
+                      <p>Please reset your password once more.</p>
                   </div>
               </div>
           </div>
@@ -496,6 +515,7 @@ const resetPassword = async (req, res) => {
                       </div>
                       <h2>Something Went Wrong!</h2>
                       <p style="color: red;">Password reset token is invalid or has expired.</p>
+                      <p>Please reset your password once more.</p>
                   </div>
               </div>
           </div>
@@ -573,7 +593,7 @@ const resetPassword = async (req, res) => {
                         <img src="https://freepngimg.com/thumb/success/6-2-success-png-image.png" width="120px">
                     </div>
                     <h2>Successful!</h2>
-                    <p>Your Password has been Updated!</p>
+                    <p>Your Password has been Updated! You are now able to Login.</p>
                 </div>
             </div>
         </div>
