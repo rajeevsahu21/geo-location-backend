@@ -113,7 +113,7 @@ const signUp = async (req, res) => {
               rel="stylesheet">
       </head>
       <body>
-          <div style="display: flex;align-items: center;justify-content: center;">
+          <center>
               <div style="width: 350px">
                   <header
                       style="display: flex; flex-direction: row; align-items:center; border-bottom: solid #A5D7E8; border-width: thin;">
@@ -154,7 +154,7 @@ const signUp = async (req, res) => {
                           GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
                   </footer>
               </div>
-          </div>
+          </center>
       </body>
       </html>`,
     };
@@ -331,7 +331,7 @@ const confirmAccount = async (req, res) => {
                     </div>
                     <h2>Successful!</h2>
                     <p style="color: green;">Your Account has been Verified!</p>
-                    <p>You are now able to Login.</p>
+                    <p>Now, You are able to Login.</p>
                 </div>
             </div>
         </div>
@@ -380,15 +380,10 @@ const recover = async (req, res) => {
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
           <link href="https://fonts.googleapis.com/css2?family=Merriweather&family=Montserrat&family=Roboto&display=swap"
               rel="stylesheet">
-          <style>
-              .mail-container {
-                  width: 350px;
-              }
-          </style>
       </head>
-      <body style="display: flex;align-items: center;justify-content: center;">
-          <div>
-              <div class="mail-container">
+      <body>
+          <center>
+              <div style="width: 350px;">
                   <header
                       style="display: flex; flex-direction: row; align-items: center; border-bottom: solid #A5D7E8; border-width: thin;">
                       <img src="https://play-lh.googleusercontent.com/asrfS4x89LkxFILsB4rYxFmX7n0K61MM0QEHpQ7GMlzfekHIeNLHxlP5dEbt1SstnFU=w240-h480"
@@ -424,7 +419,7 @@ const recover = async (req, res) => {
                           GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
                   </footer>
               </div>
-          </div>
+          </center>
       </body>
       </html>`,
     };
@@ -539,7 +534,7 @@ const resetPassword = async (req, res) => {
               rel="stylesheet">
       </head>
       <body>
-          <div style="display: flex;align-items: center;justify-content: center;">
+          <center>
               <div style="width: 350px">
                   <header
                       style="display: flex; flex-direction: row; align-items:center; border-bottom: solid #A5D7E8; border-width: thin;">
@@ -572,7 +567,7 @@ const resetPassword = async (req, res) => {
                           GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
                   </footer>
               </div>
-          </div>
+          </center>
       </body>
       </html>`,
     };
@@ -593,7 +588,7 @@ const resetPassword = async (req, res) => {
                         <img src="https://freepngimg.com/thumb/success/6-2-success-png-image.png" width="120px">
                     </div>
                     <h2>Successful!</h2>
-                    <p>Your Password has been Updated! You are now able to Login.</p>
+                    <p>Your Password has been Updated! Now, You are able to Login.</p>
                 </div>
             </div>
         </div>

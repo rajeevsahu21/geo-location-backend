@@ -155,8 +155,6 @@ const deleteCourseById = async (req, res) => {
 };
 
 const sendAttendanceViaEmail = async (req, res) => {
-  const workSheetName = "students";
-  const filePath = "./attendance.xlsx";
   try {
     const { courseId } = req.query;
     if (!mongoose.Types.ObjectId.isValid(courseId))
@@ -193,6 +191,8 @@ const sendAttendanceViaEmail = async (req, res) => {
       }
       userList.push(d);
     }
+    const workSheetName = "students";
+    const filePath = `./${course.courseName}.xlsx`;
     await exportToExcel(userList, workSheetColumnName, workSheetName, filePath);
     const mailOptions = {
       from: `"no-reply" ${process.env.SMTP_USER_NAME}`, // sender address
@@ -211,8 +211,8 @@ const sendAttendanceViaEmail = async (req, res) => {
           <link href="https://fonts.googleapis.com/css2?family=Merriweather&family=Montserrat&family=Roboto&display=swap"
               rel="stylesheet">
       </head>
-      <body style="display: flex;align-items: center;justify-content: center;">
-          <div style="display: flex;align-items: center;justify-content: center;">
+      <body>
+          <center>
               <div style="width: 350px;">
                   <header
                       style="display: flex; flex-direction: row; align-items: center; border-bottom: solid #A5D7E8; border-width: thin;">
@@ -246,14 +246,13 @@ const sendAttendanceViaEmail = async (req, res) => {
                           GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
                   </footer>
               </div>
-          </div>
-          </div>
+          </center>
       </body>
       </html>`,
       attachments: [
         {
           // filename and content type is derived from path
-          path: "./attendance.xlsx",
+          path: filePath,
         },
       ],
     };
@@ -305,8 +304,8 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
             <link href="https://fonts.googleapis.com/css2?family=Merriweather&family=Montserrat&family=Roboto&display=swap"
                 rel="stylesheet">
         </head>
-        <body style="display: flex;align-items: center;justify-content: center;">
-            <div style="display: flex;align-items: center;justify-content: center;">
+        <body>
+            <center>
                 <div style="width: 350px;">
                     <header
                         style="display: flex; flex-direction: row; align-items: center; border-bottom: solid #A5D7E8; border-width: thin;">
@@ -347,8 +346,7 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
                             GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
                     </footer>
                 </div>
-            </div>
-            </div>
+            </center>
         </body>
         </html>`,
       };
