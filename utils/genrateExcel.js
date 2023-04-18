@@ -20,7 +20,7 @@ const readExcel = async (file) => {
   const workbook = XLSX.readFile(file);
   const wsnames = workbook.SheetNames;
   const worksheet = workbook.Sheets[wsnames[0]];
-  const length = +worksheet["!ref"].split(":")[1].charAt(1);
+  const length = +worksheet["!ref"].split(":")[1].substring(1);
   let newUsers = [];
   let oldUsers = [];
   for (let i = 1; i <= length; i++) {
@@ -33,6 +33,7 @@ const readExcel = async (file) => {
         const newUser = await User.create({
           email,
           name: worksheet[`B${i}`]?.v,
+          registrationNo: email.split("@")[0],
         });
         newUsers.push(newUser);
         const mailOptions = {
