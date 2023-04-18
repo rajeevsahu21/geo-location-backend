@@ -128,7 +128,7 @@ const signUp = async (req, res) => {
                           <img src="https://png.pngtree.com/png-vector/20190726/ourmid/pngtree-package-pending-icon-for-your-project-png-image_1599195.jpg"
                               width="120px">
                       </div>
-                      <P style="text-align: left;">Hello ${name}</P>
+                      <P style="text-align: left;">Hello ${name},</P>
                       <p style="text-align: left;">Thank you for part of the GKV. Please confirm your email by clicking on the
                           following link.</p>
                       <a href=https://${process.env.HOST}/api/auth/confirm/${confirmationCode} target="_blank">

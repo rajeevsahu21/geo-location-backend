@@ -6,8 +6,6 @@ const userSchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, "Name is required"],
-      minlength: 3,
       trim: true,
     },
     email: {
@@ -34,7 +32,7 @@ const userSchema = new Schema(
     role: {
       type: String,
       enum: ["student", "teacher"],
-      default: ["student"],
+      default: "student",
     },
     status: {
       type: String,

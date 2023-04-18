@@ -278,7 +278,6 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
           .status(400)
           .json({ error: true, message: "Course Id is not valid" });
       const f = Object.entries(files)[0][1];
-      const emails = readExcel(f.filepath);
       const course = await Course.findById(courseId).populate(
         "teacher",
         "name"
@@ -287,6 +286,15 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
         return res
           .status(404)
           .json({ error: true, message: "Course not found" });
+      res.status(200).json({ error: false, message: "Email sent to everyone" });
+      const { oldUsers, newUsers } = await readExcel(f.filepath);
+      const allUsers = [...oldUsers, ...newUsers];
+      const studentIds = allUsers.map((student) => student._id);
+      await Course.updateOne(
+        { _id: courseId },
+        { $addToSet: { students: studentIds } }
+      );
+      const emails = allUsers.map((user) => user.email);
       const mailOptions = {
         from: `"no-reply" ${process.env.SMTP_USER_NAME}`, // sender address
         to: emails, // list of receivers
@@ -319,15 +327,8 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
                             <img src="https://png.pngtree.com/png-vector/20190726/ourmid/pngtree-package-pending-icon-for-your-project-png-image_1599195.jpg"
                                 width="120px">
                         </div>
-                        <p style="text-align: left;"><b>${course.teacher.name}</b> sir, invites you join the
-                          <b>${course.courseName}</b> course with this code <b>${course.courseCode}</b>.
+                        <p style="text-align: left;">Hi There,<br/><b>${course.teacher.name}</b> sir, added you in the <b>${course.courseName}</b> course.
                         </p>
-                        <a href="https://play.google.com/store/apps/details?id=com.gkv.gkvapp" target="_blank">
-                            <button
-                                style="background: #5DA7DB; border: none; color: white; height: 40px; width: 280px; border-radius: 5px; font-weight: 800; font-size: medium;">
-                                Join class
-                            </button>
-                        </a>
                     </div>
                     <br />
                     <div>
@@ -351,7 +352,6 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
         </html>`,
       };
       sendEmail(mailOptions);
-      res.status(200).json({ error: false, message: "Email sent to everyone" });
     });
   } catch (err) {
     console.log(err);
