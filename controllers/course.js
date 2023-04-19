@@ -109,6 +109,28 @@ const toggleCourseEnrollment = async (req, res) => {
   }
 };
 
+const updateCourse = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { students } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(id))
+      return res
+        .status(400)
+        .json({ error: true, message: "Course Id is not valid" });
+    const updatedCourse = await Course.findByIdAndUpdate(id, {
+      $pull: { students: { $in: students } },
+    });
+    if (!updatedCourse)
+      return res.status(404).json({ error: true, message: "Course not Found" });
+    res
+      .status(200)
+      .json({ error: false, message: "Student removed Successfully" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: true, message: "Internal Server Error" });
+  }
+};
+
 const getCourseById = async (req, res) => {
   try {
     const { courseId } = req.query;
@@ -364,6 +386,7 @@ export {
   getCourses,
   enrollCourse,
   toggleCourseEnrollment,
+  updateCourse,
   getCourseById,
   deleteCourseById,
   sendAttendanceViaEmail,

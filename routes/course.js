@@ -9,6 +9,7 @@ import {
   getCourses,
   inviteStudentsToEnrollCourse,
   sendAttendanceViaEmail,
+  updateCourse,
 } from "../controllers/course.js";
 import { checkTeacherRole } from "../middleware/role.js";
 
@@ -30,5 +31,6 @@ router.post(
   checkTeacherRole,
   inviteStudentsToEnrollCourse
 );
+router.put("/course/:id", updateCourse);
 
 export default router;

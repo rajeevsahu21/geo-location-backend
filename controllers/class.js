@@ -48,14 +48,34 @@ const updateClass = async (req, res) => {
       return res
         .status(400)
         .json({ error: true, message: "class Id is not valid" });
-    const updatedClass = await Class.findByIdAndUpdate(id, {
-      $addToSet: { students: students },
-    });
-    if (!updatedClass)
-      return res.status(404).json({ error: true, message: "class not Found" });
+    let mark = [];
+    const unMark = [];
+    if (students[0]["_id"]) {
+      students.forEach((student) => {
+        if (student.present) {
+          mark.push(student._id);
+        } else {
+          unMark.push(student._id);
+        }
+      });
+    } else {
+      mark = students;
+    }
+    await Class.updateOne(
+      { _id: id },
+      {
+        $addToSet: { students: mark },
+      }
+    );
+    await Class.updateOne(
+      { _id: id },
+      {
+        $pull: { students: { $in: unMark } },
+      }
+    );
     res
       .status(200)
-      .json({ error: false, message: "Student Added Successfully" });
+      .json({ error: false, message: "Attendance updated Successfully" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: true, message: "Internal Server Error" });
