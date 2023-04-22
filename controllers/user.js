@@ -2,11 +2,10 @@ import User from "../models/User.js";
 
 const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
     res.status(200).json({
       error: false,
-      data: user,
-      message: "User Found",
+      data: req.user,
+      message: "User Found Successfully",
     });
   } catch (err) {
     console.log(err);
