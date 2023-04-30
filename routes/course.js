@@ -31,6 +31,6 @@ router.post(
   checkTeacherRole,
   inviteStudentsToEnrollCourse
 );
-router.put("/course/:id", updateCourse);
+router.put("/course/:id", checkTeacherRole, updateCourse);
 
 export default router;
