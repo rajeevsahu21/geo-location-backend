@@ -18,7 +18,7 @@ router.post("/startClass", checkTeacherRole, startClass);
 router.put("/class/:id", checkTeacherRole, updateClass);
 router.post("/dismissClass", checkTeacherRole, dismissClass);
 router.post("/markAttendance", markAttendance);
-router.get("/getClassesByCourseId", getClassesByCourseId);
+router.get("/getClassesByCourseId", checkTeacherRole, getClassesByCourseId);
 router.get("/class/students", checkTeacherRole, getClass);
 router.get("/getClassById", checkTeacherRole, getClassById);
 router.delete("/deleteClassById", checkTeacherRole, deleteClassById);

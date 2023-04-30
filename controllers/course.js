@@ -281,7 +281,10 @@ const sendAttendanceViaEmail = async (req, res) => {
     await sendEmail(mailOptions);
     res
       .status(200)
-      .json({ error: false, message: "Attendance sent successfully" });
+      .json({
+        error: false,
+        message: "Attendance sent successfully to registered Email",
+      });
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: true, message: "Internal Server Error" });

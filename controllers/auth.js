@@ -615,7 +615,7 @@ export {
 
 const generateToken = async (user) => {
   try {
-    const payload = { _id: user._id, role: user.role };
+    const payload = { _id: user._id };
     const token = jwt.sign(payload, process.env.ACCESS_TOKEN_PRIVATE_KEY, {
       expiresIn: "30d",
     });
