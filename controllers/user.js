@@ -75,9 +75,7 @@ const updateUsers = async (req, res) => {
     console.error(err);
     res.status(500).json({
       error: true,
-      message: err.message.includes("email")
-        ? "This Email Already Exist"
-        : "Internal Server Error",
+      message: err.message || "Internal Server Error",
     });
   }
 };

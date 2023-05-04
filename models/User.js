@@ -1,16 +1,17 @@
 import mongoose from "mongoose";
+import validator from "validator";
 
-const Schema = mongoose.Schema;
-
-const userSchema = new Schema(
+const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       trim: true,
+      minlength: [3, "Name must be 3 characters or more"],
     },
     email: {
       type: String,
       required: [true, "Your email is required"],
+      validate: [validator.isEmail, "Please provide a valid email address"],
       unique: true,
       trim: true,
     },
