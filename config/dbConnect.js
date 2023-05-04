@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const dbConnect = () => {
   const connectionparams = { useNewUrlParser: true };
   mongoose.connect(process.env.MONGO_URL, connectionparams);
-
+  mongoose.set("runValidators", true);
   mongoose.connection.on("connected", () => {
     console.log("Connected to Mongoose server");
   });

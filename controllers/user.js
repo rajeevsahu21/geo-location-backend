@@ -38,6 +38,7 @@ const getUsers = async (req, res) => {
         { email: { $regex: searchTerm, $options: "i" } },
         { registrationNo: { $regex: searchTerm, $options: "i" } },
       ],
+      role: { $ne: "admin" },
     };
     const total = await User.countDocuments(query);
     const users = await User.find(query, { password: 0, token: 0 })
@@ -63,7 +64,7 @@ const updateUsers = async (req, res) => {
       return res
         .status(400)
         .json({ error: true, message: "User Id is not valid" });
-    const user = await User.findById(userId, { name, email, role });
+    const user = await User.findByIdAndUpdate(userId, { name, email, role });
     if (!user)
       return res.status(404).json({ error: true, message: "User not found" });
     res.status(200).json({
@@ -72,7 +73,10 @@ const updateUsers = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res.status(500).json({
+      error: true,
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
