@@ -1,17 +1,24 @@
 import mongoose from "mongoose";
 import User from "../models/User.js";
 import Course from "../models/Course.js";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json");
 
 const getUser = async (req, res) => {
   try {
     res.status(200).json({
       error: false,
       data: req.user,
+      version,
       message: "User Found Successfully",
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -24,7 +31,9 @@ const updateUser = async (req, res) => {
       .json({ error: false, message: "User Profile Updated successfully" });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -53,7 +62,9 @@ const getUsers = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -103,7 +114,9 @@ const getUserCourses = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 

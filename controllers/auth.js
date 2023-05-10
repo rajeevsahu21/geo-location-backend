@@ -59,7 +59,9 @@ const login = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -150,7 +152,7 @@ const signUp = async (req, res) => {
                       </div>
                   </div>
                   <footer>
-                      <p style="font-size:small;">You have received this mail because your e-mail ID is registered with
+                      <p style="font-size:x-small;">You have received this mail because your e-mail ID is registered with
                           GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
                   </footer>
               </div>
@@ -166,7 +168,9 @@ const signUp = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -233,52 +237,9 @@ const authWithGoogle = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
-  }
-};
-
-const authWithGoogleForApp = async (req, res) => {
-  try {
-    const { name, email, gId, profileImage } = req.body;
-
-    if (!gId || !name || !email)
-      return res
-        .status(400)
-        .json({ error: true, message: "Somthing is missing" });
-    if (!/[a-zA-Z0-9+_.-]+@gkv.ac.in/.test(email))
-      return res
-        .status(400)
-        .json({ error: true, message: "Please use GKV mail" });
-    const role = /^\d{8,9}@gkv\.ac\.in$/.test(email) ? "student" : "teacher";
-    const registrationNo = role === "student" ? email.split("@")[0] : null;
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      user = await new User({
-        name,
-        email,
-        gId,
-        profileImage,
-        role,
-        status: "active",
-        registrationNo,
-      }).save();
-    } else if (!user.gId) {
-      await User.updateOne(
-        { email },
-        { name, gId, profileImage, status: "active" }
-      );
-    }
-    const token = await generateToken(user);
-    res.status(200).json({
-      error: false,
-      token,
-      user,
-      message: "User Authenticated sucessfully",
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -339,7 +300,9 @@ const confirmAccount = async (req, res) => {
     </html>`);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -415,7 +378,7 @@ const recover = async (req, res) => {
                       </div>
                   </div>
                   <footer>
-                      <p style="font-size:small;">You have received this mail because your e-mail ID is registered with
+                      <p style="font-size:x-small;">You have received this mail because your e-mail ID is registered with
                           GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
                   </footer>
               </div>
@@ -429,7 +392,9 @@ const recover = async (req, res) => {
       .json({ error: false, message: "A reset email has been sent" });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -470,7 +435,9 @@ const reset = async (req, res) => {
     res.sendFile(__dirname + "/reset.html");
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -564,7 +531,7 @@ const resetPassword = async (req, res) => {
                       </div>
                   </div>
                   <footer>
-                      <p style="font-size:small;">You have received this mail because your e-mail ID is registered with
+                      <p style="font-size:x-small;">You have received this mail because your e-mail ID is registered with
                           GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
                   </footer>
               </div>
@@ -597,7 +564,9 @@ const resetPassword = async (req, res) => {
     </html>`);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -605,7 +574,6 @@ export {
   login,
   signUp,
   authWithGoogle,
-  authWithGoogleForApp,
   confirmAccount,
   recover,
   reset,

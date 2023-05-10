@@ -27,7 +27,9 @@ const createCourse = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -43,7 +45,9 @@ const getCourses = async (req, res) => {
       .json({ error: false, data: courses, message: "Available Course found" });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -82,21 +86,24 @@ const enrollCourse = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
 const toggleCourseEnrollment = async (req, res) => {
   try {
-    const { courseId, toggle } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(courseId))
+    const { id } = req.params;
+    const { toggle } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
         .json({ error: true, message: "Course Id is not valid" });
-    const course = await Course.findById(courseId);
+    const course = await Course.findById(id);
     if (!course)
       return res.status(404).json({ error: true, message: "Course not found" });
-    await Course.updateOne({ _id: courseId }, { isActive: toggle });
+    await Course.updateOne({ _id: id }, { isActive: toggle });
     res.status(200).json({
       error: false,
       message: `Course Enrollment ${
@@ -127,18 +134,20 @@ const updateCourse = async (req, res) => {
       .json({ error: false, message: "Student removed Successfully" });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
 const getCourseById = async (req, res) => {
   try {
-    const { courseId } = req.query;
-    if (!mongoose.Types.ObjectId.isValid(courseId))
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
         .json({ error: true, message: "Course Id is not valid" });
-    const course = await Course.findById(courseId).populate(
+    const course = await Course.findById(id).populate(
       "students",
       "registrationNo name"
     );
@@ -151,28 +160,32 @@ const getCourseById = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
 const deleteCourseById = async (req, res) => {
   try {
-    const { courseId } = req.query;
-    if (!mongoose.Types.ObjectId.isValid(courseId))
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
         .json({ error: true, message: "Course Id is not valid" });
-    const deletedCourse = await Course.findByIdAndDelete(courseId);
+    const deletedCourse = await Course.findByIdAndDelete(id);
     if (!deletedCourse)
       return res.status(404).json({ error: true, message: "Course not found" });
-    await Class.deleteMany({ courseId });
-    await Message.deleteMany({ courseId });
+    await Class.deleteMany({ courseId: id });
+    await Message.deleteMany({ courseId: id });
     res
       .status(200)
       .json({ error: false, message: "Course deleted successfully" });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -264,7 +277,7 @@ const sendAttendanceViaEmail = async (req, res) => {
                       </div>
                   </div>
                   <footer>
-                      <p style="font-size:small;">You have received this mail because your e-mail ID is registered with
+                      <p style="font-size:x-small;">You have received this mail because your e-mail ID is registered with
                           GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
                   </footer>
               </div>
@@ -279,15 +292,15 @@ const sendAttendanceViaEmail = async (req, res) => {
       ],
     };
     await sendEmail(mailOptions);
-    res
-      .status(200)
-      .json({
-        error: false,
-        message: "Attendance sent successfully to registered Email",
-      });
+    res.status(200).json({
+      error: false,
+      message: "Attendance sent successfully to registered Email",
+    });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -368,7 +381,7 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
                         </div>
                     </div>
                     <footer>
-                        <p style="font-size:small;">You have received this mail because your e-mail ID is registered with
+                        <p style="font-size:x-small;">You have received this mail because your e-mail ID is registered with
                             GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
                     </footer>
                 </div>
@@ -380,7 +393,9 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
