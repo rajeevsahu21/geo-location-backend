@@ -92,46 +92,27 @@ const enrollCourse = async (req, res) => {
   }
 };
 
-const toggleCourseEnrollment = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { toggle } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(id))
-      return res
-        .status(400)
-        .json({ error: true, message: "Course Id is not valid" });
-    const course = await Course.findById(id);
-    if (!course)
-      return res.status(404).json({ error: true, message: "Course not found" });
-    await Course.updateOne({ _id: id }, { isActive: toggle });
-    res.status(200).json({
-      error: false,
-      message: `Course Enrollment ${
-        toggle ? "Started" : "Closed"
-      } successfully`,
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
-  }
-};
-
 const updateCourse = async (req, res) => {
   try {
     const { id } = req.params;
-    const { students } = req.body;
+    const { students, toggle } = req.body;
     if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
         .json({ error: true, message: "Course Id is not valid" });
     const updatedCourse = await Course.findByIdAndUpdate(id, {
       $pull: { students: { $in: students } },
+      isActive: toggle,
     });
     if (!updatedCourse)
       return res.status(404).json({ error: true, message: "Course not Found" });
-    res
-      .status(200)
-      .json({ error: false, message: "Student removed Successfully" });
+    res.status(200).json({
+      error: false,
+      message:
+        toggle !== undefined
+          ? `Course Enrollment ${toggle ? "Started" : "Closed"} successfully`
+          : "Student removed Successfully",
+    });
   } catch (err) {
     console.log(err);
     res
@@ -403,7 +384,6 @@ export {
   createCourse,
   getCourses,
   enrollCourse,
-  toggleCourseEnrollment,
   updateCourse,
   getCourseById,
   deleteCourseById,
