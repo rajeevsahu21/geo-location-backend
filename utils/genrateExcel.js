@@ -86,7 +86,7 @@ const readExcel = async (file) => {
                           </div>
                       </div>
                       <footer>
-                          <p style="font-size:small;">You have received this mail because your e-mail ID is registered with
+                          <p style="font-size:x-small;">You have received this mail because your e-mail ID is registered with
                               GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
                       </footer>
                   </div>

@@ -19,7 +19,9 @@ const addMessage = async (req, res) => {
     sendPushNotification(title, message, courseId);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: true, message: "Internal server error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal server error" });
   }
 };
 
@@ -42,7 +44,9 @@ const getMessage = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: true, message: "Internal server error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal server error" });
   }
 };
 
@@ -65,7 +69,9 @@ const getMessages = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: true, message: "Internal server error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal server error" });
   }
 };
 
@@ -90,7 +96,9 @@ const updateMessage = async (req, res) => {
       .json({ error: false, message: "Message Updated successfully" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: true, message: "Internal server error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal server error" });
   }
 };
 
@@ -111,7 +119,9 @@ const deleteMessage = async (req, res) => {
       .json({ error: false, message: "Message deleted successfully" });
   } catch (error) {
     console.error(err);
-    res.status(500).json({ error: true, message: "Internal server error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal server error" });
   }
 };
 

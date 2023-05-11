@@ -9,7 +9,6 @@ import {
   reset,
   resetPassword,
   authWithGoogle,
-  authWithGoogleForApp,
   generateToken,
 } from "../controllers/auth.js";
 
@@ -18,7 +17,6 @@ const router = Router();
 router.post("/api/auth/login", login);
 router.post("/api/auth/signUp", signUp);
 router.post("/api/auth/google", authWithGoogle);
-router.post("/api/auth/authWithGoogle", authWithGoogleForApp);
 router.get(
   "/auth/google",
   async (req, res, next) => {

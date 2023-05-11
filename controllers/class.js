@@ -36,7 +36,9 @@ const startClass = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -78,44 +80,36 @@ const updateClass = async (req, res) => {
       .json({ error: false, message: "Attendance updated Successfully" });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
-const dismissClass = async (req, res) => {
+const markAttendance = async (req, res) => {
   try {
     const { courseId } = req.body;
     if (!mongoose.Types.ObjectId.isValid(courseId))
       return res
         .status(400)
         .json({ error: true, message: "Course Id is not valid" });
-    const oldClass = await Class.findOneAndUpdate(
-      { courseId, active: true },
-      { active: false }
-    );
-    await Course.updateOne({ _id: courseId }, { activeClass: false });
-    if (!oldClass)
-      return res
-        .status(404)
-        .json({ error: true, message: "No running Class found" });
-    res.status(200).json({
-      error: false,
-      message: "Class dismissed successfully",
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
-  }
-};
-
-const markAttendance = async (req, res) => {
-  try {
-    const { courseId, location } = req.body;
-    if (
-      !location.longitude ||
-      !location.latitude ||
-      !mongoose.Types.ObjectId.isValid(courseId)
-    )
+    if (req.user.role === "teacher") {
+      const oldClass = await Class.findOneAndUpdate(
+        { courseId, active: true },
+        { active: false }
+      );
+      await Course.updateOne({ _id: courseId }, { activeClass: false });
+      if (!oldClass)
+        return res
+          .status(404)
+          .json({ error: true, message: "No running Class found" });
+      return res.status(200).json({
+        error: false,
+        message: "Class dismissed successfully",
+      });
+    }
+    const { location } = req.body;
+    if (!location.longitude || !location.latitude)
       return res
         .status(400)
         .json({ error: true, message: "Required field is missing" });
@@ -165,7 +159,9 @@ const markAttendance = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -188,7 +184,9 @@ const getClassesByCourseId = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
@@ -227,18 +225,20 @@ const getClass = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
 const getClassById = async (req, res) => {
   try {
-    const { classId } = req.query;
-    if (!mongoose.Types.ObjectId.isValid(classId))
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
         .json({ error: true, message: "Class Id is not valid" });
-    const foundClass = await Class.findById(classId, { __v: 0 }).populate(
+    const foundClass = await Class.findById(id, { __v: 0 }).populate(
       "students",
       "name registrationNo"
     );
@@ -254,18 +254,20 @@ const getClassById = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
 const deleteClassById = async (req, res) => {
   try {
-    const { classId } = req.query;
-    if (!mongoose.Types.ObjectId.isValid(classId))
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
         .json({ error: true, message: "Class Id is not valid" });
-    const deletedClass = await Class.findByIdAndDelete(classId);
+    const deletedClass = await Class.findByIdAndDelete(id);
     if (!deletedClass)
       return res.status(404).json({ error: true, message: "Class not found" });
     res
@@ -273,14 +275,15 @@ const deleteClassById = async (req, res) => {
       .json({ error: false, message: "Class deleted successfully" });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: true, message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: true, message: err.message || "Internal Server Error" });
   }
 };
 
 export {
   startClass,
   updateClass,
-  dismissClass,
   markAttendance,
   getClassesByCourseId,
   getClass,
