@@ -13,12 +13,12 @@ import { checkTeacherRole } from "../middleware/role.js";
 
 const router = Router();
 
-router.post("/class", checkTeacherRole, startClass);
-router.put("/class/:id", checkTeacherRole, updateClass);
-router.put("/class", markAttendance);
-router.get("/class", checkTeacherRole, getClassesByCourseId);
-router.get("/class/students", checkTeacherRole, getClass);
-router.get("/class/:id", checkTeacherRole, getClassById);
-router.delete("/class/:id", checkTeacherRole, deleteClassById);
+router.post("/", checkTeacherRole, startClass);
+router.put("/:id", checkTeacherRole, updateClass);
+router.put("/", markAttendance);
+router.get("/", checkTeacherRole, getClassesByCourseId);
+router.get("/students", checkTeacherRole, getClass);
+router.get("/:id", checkTeacherRole, getClassById);
+router.delete("/:id", checkTeacherRole, deleteClassById);
 
 export default router;

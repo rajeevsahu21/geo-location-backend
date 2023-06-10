@@ -39,8 +39,8 @@ app.get("/api", (req, res) => {
 });
 app.use("/", authRoutes);
 app.use(authMiddleWare);
-app.use("/api", classRoutes);
-app.use("/api", courseRoutes);
+app.use("/api/class", classRoutes);
+app.use("/api/course", courseRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
 
