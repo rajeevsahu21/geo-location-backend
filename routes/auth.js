@@ -11,10 +11,11 @@ import {
   authWithGoogle,
   generateToken,
 } from "../controllers/auth.js";
+import { limiter } from "../middleware/rateLimiter.js";
 
 const router = Router();
 
-router.post("/api/auth/login", login);
+router.post("/api/auth/login", limiter, login);
 router.post("/api/auth/signUp", signUp);
 router.post("/api/auth/google", authWithGoogle);
 router.get(
@@ -44,8 +45,8 @@ router.get(
   }
 );
 router.get("/api/auth/confirm/:token", confirmAccount);
-router.post("/api/auth/recover", recover);
-router.get("/api/auth/reset/:token", reset);
+router.post("/api/auth/recover", limiter, recover);
+router.get("/api/auth/reset/:token", limiter, reset);
 router.post("/api/auth/reset/:token", resetPassword);
 
 export default router;
