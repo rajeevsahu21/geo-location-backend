@@ -21,6 +21,6 @@ router.get("/:id", checkTeacherRole, getCourseById);
 router.post("/attendance", checkTeacherRole, sendAttendanceViaEmail);
 router.delete("/:id", checkTeacherRole, deleteCourseById);
 router.post("/invite", checkTeacherRole, inviteStudentsToEnrollCourse);
-router.put("/:id", checkTeacherRole, updateCourse);
+router.put("/:id", updateCourse);
 
 export default router;
