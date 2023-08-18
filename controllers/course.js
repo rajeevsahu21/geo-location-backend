@@ -100,16 +100,22 @@ const updateCourse = async (req, res) => {
       return res
         .status(400)
         .json({ error: true, message: "Course Id is not valid" });
-    const updatedCourse = await Course.findByIdAndUpdate(id, {
-      $pull: { students: { $in: students } },
-      isActive: toggle,
-    });
+    let update = {
+      $pull: { students: { $in: req.user._id } },
+    };
+    if (req.user.role === "teacher") {
+      update = {
+        $pull: { students: { $in: students } },
+        isActive: toggle,
+      };
+    }
+    const updatedCourse = await Course.findByIdAndUpdate(id, update);
     if (!updatedCourse)
       return res.status(404).json({ error: true, message: "Course not Found" });
     res.status(200).json({
       error: false,
       message:
-        toggle !== undefined
+        toggle !== undefined && req.user.role != "student"
           ? `Course Enrollment ${toggle ? "Started" : "Closed"} successfully`
           : "Student removed Successfully",
     });
