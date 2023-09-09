@@ -15,12 +15,12 @@ const startClass = async (req, res) => {
     )
       return res
         .status(400)
-        .json({ error: true, message: "Required field is missing" });
+        .json({ status: "failure", message: "Required field is missing" });
     const runningClass = await Class.findOne({ courseId, active: true });
     if (runningClass)
       return res
         .status(400)
-        .json({ error: true, message: "Already Have a running class" });
+        .json({ status: "failure", message: "Already Have a running class" });
     const newClass = await new Class({
       courseId,
       location,
@@ -30,15 +30,16 @@ const startClass = async (req, res) => {
     sendPushNotification("New class Started", "Mark your Attendance", courseId);
     await Course.updateOne({ _id: courseId }, { activeClass: true, radius });
     res.status(201).json({
-      error: false,
+      status: "success",
       data: newClass,
       message: "Class Started successfully",
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -49,7 +50,7 @@ const updateClass = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
-        .json({ error: true, message: "class Id is not valid" });
+        .json({ status: "failure", message: "class Id is not valid" });
     let mark = [];
     const unMark = [];
     if (students[0]["_id"]) {
@@ -77,12 +78,13 @@ const updateClass = async (req, res) => {
     );
     res
       .status(200)
-      .json({ error: false, message: "Attendance updated Successfully" });
+      .json({ status: "success", message: "Attendance updated Successfully" });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -92,7 +94,7 @@ const markAttendance = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(courseId))
       return res
         .status(400)
-        .json({ error: true, message: "Course Id is not valid" });
+        .json({ status: "failure", message: "Course Id is not valid" });
     if (req.user.role === "teacher") {
       const oldClass = await Class.findOneAndUpdate(
         { courseId, active: true },
@@ -102,9 +104,9 @@ const markAttendance = async (req, res) => {
       if (!oldClass)
         return res
           .status(404)
-          .json({ error: true, message: "No running Class found" });
+          .json({ status: "failure", message: "No running Class found" });
       return res.status(200).json({
-        error: false,
+        status: "success",
         message: "Class dismissed successfully",
       });
     }
@@ -112,22 +114,23 @@ const markAttendance = async (req, res) => {
     if (!location.longitude || !location.latitude)
       return res
         .status(400)
-        .json({ error: true, message: "Required field is missing" });
+        .json({ status: "failure", message: "Required field is missing" });
     const studentId = req.user._id;
     const runningClass = await Class.findOne({ courseId, active: true });
     if (!runningClass)
       return res
         .status(404)
-        .json({ error: true, message: "No running class found" });
+        .json({ status: "failure", message: "No running class found" });
     const classId = runningClass._id;
     const studentClass = await Class.findOne({
       _id: classId,
       students: studentId,
     });
     if (studentClass)
-      return res
-        .status(400)
-        .json({ error: true, message: "Student already marked Attendance" });
+      return res.status(400).json({
+        status: "failure",
+        message: "Student already marked Attendance",
+      });
 
     const distance = calculateDistance(
       runningClass.location.latitude,
@@ -148,20 +151,21 @@ const markAttendance = async (req, res) => {
     if (distance > runningClass.radius) {
       return res
         .status(400)
-        .json({ error: true, message: "You are too far from class" });
+        .json({ status: "failure", message: "You are too far from class" });
     }
     await Class.findByIdAndUpdate(classId, {
       $addToSet: { students: studentId },
     });
     res.status(200).json({
-      error: false,
+      status: "success",
       message: "Class Attendance marked successfully",
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -171,22 +175,23 @@ const getClassesByCourseId = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(courseId))
       return res
         .status(400)
-        .json({ error: true, message: "Course Id is not valid" });
+        .json({ status: "failure", message: "Course Id is not valid" });
     const query =
       req.user.role === "student"
         ? { students: req.user._id, courseId }
         : { courseId };
     const classes = await Class.find(query).sort({ createdAt: -1 });
     res.status(200).json({
-      error: false,
+      status: "success",
       data: classes,
       message: `Available classes found: ${classes.length}`,
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -196,11 +201,11 @@ const getClass = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(classId))
       return res
         .status(400)
-        .json({ error: true, message: "Class Id is not valid" });
+        .json({ status: "failure", message: "Class Id is not valid" });
     const foundClass = await Class.findById(classId).lean();
     if (!foundClass)
       return res.status(404).json({
-        error: true,
+        status: "failure",
         message: "Class not found",
       });
     const course = await Course.findById(foundClass.courseId)
@@ -219,15 +224,16 @@ const getClass = async (req, res) => {
       attendance.push(student);
     }
     res.status(200).json({
-      error: false,
+      status: "success",
       data: attendance,
       message: "Student Attendance found",
     });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -237,26 +243,27 @@ const getClassById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
-        .json({ error: true, message: "Class Id is not valid" });
+        .json({ status: "failure", message: "Class Id is not valid" });
     const foundClass = await Class.findById(id, { __v: 0 }).populate(
       "students",
       "name registrationNo"
     );
     if (!foundClass)
       return res.status(404).json({
-        error: true,
+        status: "failure",
         message: "Class not found",
       });
     res.status(200).json({
-      error: false,
+      status: "success",
       data: foundClass,
       message: `${foundClass.students.length} student found`,
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -266,18 +273,21 @@ const deleteClassById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
-        .json({ error: true, message: "Class Id is not valid" });
+        .json({ status: "failure", message: "Class Id is not valid" });
     const deletedClass = await Class.findByIdAndDelete(id);
     if (!deletedClass)
-      return res.status(404).json({ error: true, message: "Class not found" });
+      return res
+        .status(404)
+        .json({ status: "failure", message: "Class not found" });
     res
       .status(200)
-      .json({ error: false, message: "Class deleted successfully" });
+      .json({ status: "success", message: "Class deleted successfully" });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -320,7 +330,7 @@ const closeClass = (courseId) => {
     setTimeout(async () => {
       await Class.updateOne({ courseId, active: true }, { active: false });
       await Course.updateOne({ _id: courseId }, { activeClass: false });
-    }, 600000);
+    }, 300000);
   } catch (err) {
     console.error(err);
   }

@@ -1,12 +1,12 @@
 {
   "name": "geo-location-backend",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "geo location attendence app for university",
   "main": "app.js",
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "start:dev": "nodemon app.js"
+    "dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -19,23 +19,27 @@
   ],
   "author": "Rajeev Sahu",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rajeevsahu21/geo-location-backend/issues"
+  },
+  "homepage": "https://github.com/rajeevsahu21/geo-location-backend#readme",
   "dependencies": {
-    "bcrypt": "^5.1.0",
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "express-rate-limit": "^6.7.0",
-    "express-session": "^1.17.3",
-    "formidable": "^2.1.1",
-    "google-auth-library": "^8.7.0",
-    "joi": "^17.7.0",
-    "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.7.5",
-    "node-fetch": "^3.3.1",
-    "nodemailer": "^6.8.0",
+    "express-rate-limit": "^6.11.0",
+    "formidable": "^3.5.1",
+    "google-auth-library": "^9.0.0",
+    "handlebars": "^4.7.8",
+    "joi": "^17.10.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.5.0",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.9.5",
     "passport": "^0.6.0",
     "passport-google-oauth": "^2.0.0",
-    "validator": "^13.9.0",
+    "validator": "^13.11.0",
     "xlsx": "^0.18.5"
   }
 }

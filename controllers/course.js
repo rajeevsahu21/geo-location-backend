@@ -12,7 +12,7 @@ const createCourse = async (req, res) => {
     if (!req.body.courseName)
       return res
         .status(400)
-        .json({ error: true, message: "Please Enter Course Name" });
+        .json({ status: "failure", message: "Please Enter Course Name" });
     const courseName = req.body.courseName;
     const courseCode = generateCourseCode(6);
     const newCourse = await new Course({
@@ -21,15 +21,16 @@ const createCourse = async (req, res) => {
       teacher: req.user._id,
     }).save();
     res.status(201).json({
-      error: false,
+      status: "success",
       data: newCourse,
       message: "Course Created successfully",
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -40,14 +41,17 @@ const getCourses = async (req, res) => {
         ? { students: req.user._id }
         : { teacher: req.user._id };
     const courses = await Course.find(query);
-    res
-      .status(200)
-      .json({ error: false, data: courses, message: "Available Course found" });
+    res.status(200).json({
+      status: "success",
+      data: courses,
+      message: "Available Course found",
+    });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -56,16 +60,18 @@ const enrollCourse = async (req, res) => {
     if (!req.body.courseCode)
       return res
         .status(400)
-        .json({ error: true, message: "Please Enter Course Code" });
+        .json({ status: "failure", message: "Please Enter Course Code" });
     const courseCode = req.body.courseCode.replace(/\s/g, "").toLowerCase();
     const studentId = req.user._id;
     const course = await Course.findOne({ courseCode });
     if (!course)
-      return res.status(404).json({ error: true, message: "Course not found" });
+      return res
+        .status(404)
+        .json({ status: "failure", message: "Course not found" });
     if (!course.isActive)
       return res
         .status(400)
-        .json({ error: true, message: "Course closed for enrollment" });
+        .json({ status: "failure", message: "Course closed for enrollment" });
     const studentCourse = await Course.findOne({
       courseCode,
       students: studentId,
@@ -73,22 +79,23 @@ const enrollCourse = async (req, res) => {
     if (studentCourse)
       return res
         .status(400)
-        .json({ error: true, message: "Student already enrolled" });
+        .json({ status: "failure", message: "Student already enrolled" });
     const enrolledCourse = await Course.findOneAndUpdate(
       { courseCode },
       { $addToSet: { students: studentId } },
       { new: true }
     );
     res.status(200).json({
-      error: false,
+      status: "success",
       data: enrolledCourse,
       message: "Course Enrollment Done",
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -99,7 +106,7 @@ const updateCourse = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
-        .json({ error: true, message: "Course Id is not valid" });
+        .json({ status: "failure", message: "Course Id is not valid" });
     let update = {
       $pull: { students: { $in: req.user._id } },
     };
@@ -111,9 +118,11 @@ const updateCourse = async (req, res) => {
     }
     const updatedCourse = await Course.findByIdAndUpdate(id, update);
     if (!updatedCourse)
-      return res.status(404).json({ error: true, message: "Course not Found" });
+      return res
+        .status(404)
+        .json({ status: "failure", message: "Course not Found" });
     res.status(200).json({
-      error: false,
+      status: "success",
       message:
         toggle !== undefined && req.user.role != "student"
           ? `Course Enrollment ${toggle ? "Started" : "Closed"} successfully`
@@ -121,9 +130,10 @@ const updateCourse = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -133,23 +143,26 @@ const getCourseById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
-        .json({ error: true, message: "Course Id is not valid" });
+        .json({ status: "failure", message: "Course Id is not valid" });
     const course = await Course.findById(id).populate(
       "students",
       "registrationNo name"
     );
     if (!course)
-      return res.status(404).json({ error: true, message: "Course not found" });
+      return res
+        .status(404)
+        .json({ status: "failure", message: "Course not found" });
     res.status(200).json({
-      error: false,
+      status: "success",
       data: course,
       message: "Course Found successfully",
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -159,20 +172,23 @@ const deleteCourseById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
-        .json({ error: true, message: "Course Id is not valid" });
+        .json({ status: "failure", message: "Course Id is not valid" });
     const deletedCourse = await Course.findByIdAndDelete(id);
     if (!deletedCourse)
-      return res.status(404).json({ error: true, message: "Course not found" });
+      return res
+        .status(404)
+        .json({ status: "failure", message: "Course not found" });
     await Class.deleteMany({ courseId: id });
     await Message.deleteMany({ courseId: id });
     res
       .status(200)
-      .json({ error: false, message: "Course deleted successfully" });
+      .json({ status: "success", message: "Course deleted successfully" });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -182,15 +198,19 @@ const sendAttendanceViaEmail = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(courseId))
       return res
         .status(400)
-        .json({ error: true, message: "Course Id is not valid" });
+        .json({ status: "failure", message: "Course Id is not valid" });
     const course = await Course.findById(courseId)
       .populate("students", "name registrationNo")
       .populate("teacher", "email");
     if (!course)
-      return res.status(404).json({ error: true, message: "Course not found" });
+      return res
+        .status(404)
+        .json({ status: "failure", message: "Course not found" });
     const classes = await Class.find({ courseId });
     if (!classes.length)
-      return res.status(404).json({ error: true, message: "No Classes found" });
+      return res
+        .status(404)
+        .json({ status: "failure", message: "No Classes found" });
     const courseName = course.courseName;
     const classesDates = classes.map((cls) =>
       cls.createdAt.toLocaleDateString("pt-PT")
@@ -280,14 +300,15 @@ const sendAttendanceViaEmail = async (req, res) => {
     };
     await sendEmail(mailOptions);
     res.status(200).json({
-      error: false,
+      status: "success",
       message: "Attendance sent successfully to registered Email",
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -296,12 +317,14 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
     const form = formidable({ multiples: true });
     form.parse(req, async (err, fields, files) => {
       if (!files.emails)
-        return res.status(400).json({ error: true, message: "File not found" });
+        return res
+          .status(400)
+          .json({ status: "failure", message: "File not found" });
       const courseId = fields.courseId;
       if (!mongoose.Types.ObjectId.isValid(courseId))
         return res
           .status(400)
-          .json({ error: true, message: "Course Id is not valid" });
+          .json({ status: "failure", message: "Course Id is not valid" });
       const f = Object.entries(files)[0][1];
       const course = await Course.findById(courseId).populate(
         "teacher",
@@ -310,8 +333,10 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
       if (!course)
         return res
           .status(404)
-          .json({ error: true, message: "Course not found" });
-      res.status(200).json({ error: false, message: "Email sent to everyone" });
+          .json({ status: "failure", message: "Course not found" });
+      res
+        .status(200)
+        .json({ status: "success", message: "Email sent to everyone" });
       const { oldUsers, newUsers } = await readExcel(f.filepath);
       const allUsers = [...oldUsers, ...newUsers];
       const studentIds = allUsers.map((student) => student._id);
@@ -380,9 +405,10 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
