@@ -1,5 +1,4 @@
 import { Router } from "express";
-import passport from "passport";
 
 import {
   login,
@@ -9,44 +8,16 @@ import {
   reset,
   resetPassword,
   authWithGoogle,
-  generateToken,
 } from "../controllers/auth.js";
 import { limiter } from "../middleware/rateLimiter.js";
 
 const router = Router();
 
-router.post("/api/auth/login", limiter, login);
-router.post("/api/auth/signUp", signUp);
-router.post("/api/auth/google", authWithGoogle);
-router.get(
-  "/auth/google",
-  async (req, res, next) => {
-    if (req.user) {
-      const token = await generateToken(req.user);
-      return res.status(200).json({
-        error: false,
-        token,
-        user: req.user,
-        message: "User Authenticated sucessfully",
-      });
-    }
-    next();
-  },
-  passport.authenticate("google", { scope: ["email", "profile"] })
-);
-router.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/auth/google",
-    session: true,
-  }),
-  (req, res) => {
-    res.redirect("/auth/google");
-  }
-);
-router.get("/api/auth/confirm/:token", confirmAccount);
-router.post("/api/auth/recover", limiter, recover);
-router.get("/api/auth/reset/:token", limiter, reset);
-router.post("/api/auth/reset/:token", resetPassword);
+router.post("/login", limiter, login);
+router.post("/signUp", signUp);
+router.post("/google", authWithGoogle);
+router.get("/confirm/:token", confirmAccount);
+router.post("/recover", limiter, recover);
+router.route("/reset/:token").get(limiter, reset).post(resetPassword);
 
 export default router;

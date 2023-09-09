@@ -3,7 +3,8 @@ import jwt from "jsonwebtoken";
 import path from "path";
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
-import fetch from "node-fetch";
+import Handlebars from "handlebars";
+import fs from "fs";
 
 import User from "../models/User.js";
 import {
@@ -12,6 +13,9 @@ import {
 } from "../utils/validationSchema.js";
 import sendEmail from "../utils/sendEmail.js";
 
+// @route POST /api/auth/login
+// @desc Login with email and password
+// @access Public
 const login = async (req, res) => {
   try {
     const { error } = logInBodyValidation(req.body);
@@ -65,6 +69,9 @@ const login = async (req, res) => {
   }
 };
 
+// @route POST api/auth/signUp
+// @desc create a new user account
+// @access Public
 const signUp = async (req, res) => {
   try {
     const { error } = signUpBodyValidation(req.body);
@@ -89,7 +96,7 @@ const signUp = async (req, res) => {
     const hashPassword = await bcrypt.hash(req.body.password, salt);
 
     const confirmationCode = crypto.randomBytes(25).toString("hex");
-    const user = await User.create({
+    await User.create({
       name,
       email,
       registrationNo,
@@ -97,68 +104,23 @@ const signUp = async (req, res) => {
       password: hashPassword,
       confirmationCode,
     });
+    const __dirname = path.resolve();
+    const templatePath = path.join(
+      __dirname,
+      "./template/confirm-account.html"
+    );
+    const source = fs.readFileSync(templatePath, { encoding: "utf-8" });
+    const template = Handlebars.compile(source);
+    const html = template({
+      OTP: confirmationCode,
+      NAME: name,
+      HOST: process.env.HOST,
+    });
     const mailOptions = {
       from: `"no-reply" ${process.env.SMTP_USER_NAME}`,
       to: email,
       subject: "Please confirm your account",
-      html: `<!DOCTYPE html>
-      <html lang="en"> 
-      <head>
-          <meta charset="UTF-8">
-          <meta http-equiv="X-UA-Compatible" content="IE=edge">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Confirm Account</title>
-          <link rel="preconnect" href="https://fonts.googleapis.com">
-          <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-          <link href="https://fonts.googleapis.com/css2?family=Merriweather&family=Montserrat&family=Roboto&display=swap"
-              rel="stylesheet">
-      </head>
-      <body>
-          <center>
-              <div style="width: 350px">
-                  <header
-                      style="display: flex; flex-direction: row; align-items:center; border-bottom: solid #A5D7E8; border-width: thin;">
-                      <img src="https://play-lh.googleusercontent.com/asrfS4x89LkxFILsB4rYxFmX7n0K61MM0QEHpQ7GMlzfekHIeNLHxlP5dEbt1SstnFU=w240-h480"
-                          width="60px" height="50px" alt="GKV" />
-                      <p style="font-family: Merriweather; color: #002B5B;margin-left: 20px; font-weight: 600;">GKV<span>
-                              App</span></p>
-                  </header>
-                  <br />
-                  <div style="text-align: center;">
-                      <div>
-                          <img src="https://png.pngtree.com/png-vector/20190726/ourmid/pngtree-package-pending-icon-for-your-project-png-image_1599195.jpg"
-                              width="120px">
-                      </div>
-                      <P style="text-align: left;">Hello ${name},</P>
-                      <p style="text-align: left;">Thank you for part of the GKV. Please confirm your email by clicking on the
-                          following link.</p>
-                      <a href=https://${process.env.HOST}/api/auth/confirm/${confirmationCode} target="_blank">
-                          <button
-                              style="background: #5DA7DB; border: none; color: white; height: 40px; width: 280px; border-radius: 5px; font-weight: 800; font-size: medium;cursor: pointer;">
-                              Verify Email-ID</button>
-                      </a>
-                  </div>
-                  <br />
-                  <div>
-                      <div style="display: flex; border-radius: 4px;">
-                          <div style="padding-left: 1%;">
-                              <P style="word-wrap: break-word; font-weight: 600;">Available on Playstore</P>
-                          </div>
-                          <a href='https://play.google.com/store/apps/details?id=com.gkv.gkvapp'
-                              style='cursor:pointer;display:block'><img
-                                  src='https://cdn.me-qr.com/qr/55920118.png?v=1681240451' style="overflow: hidden;"
-                                  width="160px" alt='Download app from Playstore'></a>
-                      </div>
-                  </div>
-                  <footer>
-                      <p style="font-size:x-small;">You have received this mail because your e-mail ID is registered with
-                          GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
-                  </footer>
-              </div>
-          </center>
-      </body>
-      </html>`,
+      html,
     };
     sendEmail(mailOptions);
 
@@ -174,6 +136,9 @@ const signUp = async (req, res) => {
   }
 };
 
+// @route POST api/auth/google
+// @desc continue with google authentication
+// @access Public
 const authWithGoogle = async (req, res) => {
   try {
     let profile;
@@ -243,6 +208,9 @@ const authWithGoogle = async (req, res) => {
   }
 };
 
+// @route POST api/auth/confirm/:token
+// @desc verify the user account
+// @access Public
 const confirmAccount = async (req, res) => {
   try {
     const user = await User.findOneAndUpdate(
@@ -251,53 +219,26 @@ const confirmAccount = async (req, res) => {
       },
       { status: "active" }
     );
-    if (!user)
-      return res.send(`<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Error</title>
-    </head>
-    <body>
-        <div style="display: flex;align-items: center;justify-content: center;">
-            <div style="width: 350px;">
-                <div style="display: flex; flex-direction: column; align-items: center;padding-top: 80px;">
-                    <div style="display: flex; justify-content: center;">
-                        <img src="https://nika.shop/wp-content/uploads/2020/01/fail-png-7.png" width="120px">
-                    </div>
-                    <h2>Something Went Wrong!</h2>
-                    <p style="color: red;">User Not Found.</p>
-                    <p>Please register again or Continue with Google.</p>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>`);
-    res.send(`<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Success</title>
-    </head>
-    <body>
-        <div style="display: flex;align-items: center;justify-content: center;">
-            <div style="width: 350px;">
-                <div style="display: flex; flex-direction: column; align-items: center;padding-top: 80px;">
-                    <div style="display: flex; justify-content: center;">
-                        <img src="https://freepngimg.com/thumb/success/6-2-success-png-image.png" width="120px">
-                    </div>
-                    <h2>Successful!</h2>
-                    <p style="color: green;">Your Account has been Verified!</p>
-                    <p>Now, You are able to Login.</p>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>`);
+    if (!user) {
+      const __dirname = path.resolve();
+      const templatePath = path.join(__dirname, "./template/error.html");
+      const source = fs.readFileSync(templatePath, { encoding: "utf-8" });
+      const template = Handlebars.compile(source);
+      const html = template({
+        TITLE: "User Not Found.",
+        MESSAGE: "Please register again or Continue with Google.",
+      });
+      return res.send(html);
+    }
+    const __dirname = path.resolve();
+    const templatePath = path.join(__dirname, "./template/success.html");
+    const source = fs.readFileSync(templatePath, { encoding: "utf-8" });
+    const template = Handlebars.compile(source);
+    const html = template({
+      TITLE: "Your Account has been Verified!",
+      MESSAGE: "Now, You are able to Login.",
+    });
+    res.send(html);
   } catch (err) {
     console.log(err);
     res
@@ -322,69 +263,28 @@ const recover = async (req, res) => {
         resetPasswordExpires: Date.now() + 3600000,
       }
     );
-    if (!user)
+    if (!user) {
       return res
         .status(401)
         .json({ error: true, message: "No User found with given email" });
-    let link = `https://${process.env.HOST}/api/auth/reset/${resetPasswordToken}`;
+    }
+    const __dirname = path.resolve();
+    const templatePath = path.join(
+      __dirname,
+      "./template/forgot-password.html"
+    );
+    const source = fs.readFileSync(templatePath, { encoding: "utf-8" });
+    const template = Handlebars.compile(source);
+    const html = template({
+      OTP: resetPasswordToken,
+      NAME: user.name,
+      HOST: process.env.HOST,
+    });
     const mailOptions = {
       from: `"no-reply" ${process.env.SMTP_USER_NAME}`,
       to: user.email,
       subject: "Password change request",
-      html: `<!DOCTYPE html>
-      <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <meta http-equiv="X-UA-Compatible" content="IE=edge">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Password Change</title>
-          <link rel="preconnect" href="https://fonts.googleapis.com">
-          <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-          <link href="https://fonts.googleapis.com/css2?family=Merriweather&family=Montserrat&family=Roboto&display=swap"
-              rel="stylesheet">
-      </head>
-      <body>
-          <center>
-              <div style="width: 350px;">
-                  <header
-                      style="display: flex; flex-direction: row; align-items: center; border-bottom: solid #A5D7E8; border-width: thin;">
-                      <img src="https://play-lh.googleusercontent.com/asrfS4x89LkxFILsB4rYxFmX7n0K61MM0QEHpQ7GMlzfekHIeNLHxlP5dEbt1SstnFU=w240-h480"
-                          width="60px" height="50px" alt="GKV" />
-                      <p style="font-family: Merriweather; color: #002B5B;margin-left: 20px; font-weight: 600;">GKV<span> App</span></p>
-                  </header>
-                  <br />
-                  <div>
-                      <p style="font-family: Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif; text-align: start; color: grey; line-height: 2;">
-                          Hi ${user.name},<br /> <br />
-                          Sorry to hear you're having trouble logging into GKV-app. We got a message that you forgot your
-                          password. If this was you, you can reset your password now.</p>
-                      <a href=${link} target="_blank">
-                          <button
-                              style="background: #5DA7DB; border: none; color: white;cursor: pointer ;height: 50px; width: 280px; border-radius: 5px;margin-left: 20px; font-weight: 800; font-size: medium;">
-                              Reset your password
-                          </button>
-                      </a>
-                  </div>
-                  <br />
-                  <div>
-                      <div style="display: flex; border-radius: 4px;">
-                          <div style="padding-left: 1%;">
-                              <P style="word-wrap: break-word; font-weight: 600;">Available on Playstore</P>
-                          </div>
-                          <a href='https://play.google.com/store/apps/details?id=com.gkv.gkvapp' style='cursor:pointer;display:block'><img
-                                  src='https://cdn.me-qr.com/qr/55920118.png?v=1681240451' style="overflow: hidden;"
-                                  width="160px" alt='Download app from Playstore'></a>
-                      </div>
-                  </div>
-                  <footer>
-                      <p style="font-size:x-small;">You have received this mail because your e-mail ID is registered with
-                          GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
-                  </footer>
-              </div>
-          </center>
-      </body>
-      </html>`,
+      html,
     };
     sendEmail(mailOptions);
     res
@@ -407,32 +307,18 @@ const reset = async (req, res) => {
       resetPasswordToken: req.params.token,
       resetPasswordExpires: { $gt: Date.now() },
     });
-    if (!user)
-      return res.send(`<!DOCTYPE html>
-      <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <meta http-equiv="X-UA-Compatible" content="IE=edge">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Error</title>
-      </head>
-      <body>
-          <div style="display: flex;align-items: center;justify-content: center;">
-              <div style="width: 350px;">
-                  <div style="display: flex; flex-direction: column; align-items: center;padding-top: 80px;">
-                      <div style="display: flex; justify-content: center;">
-                          <img src="https://nika.shop/wp-content/uploads/2020/01/fail-png-7.png" width="120px">
-                      </div>
-                      <h2>Something Went Wrong!</h2>
-                      <p style="color: red;">Password reset token is invalid or has expired.</p>
-                      <p>Please reset your password once more.</p>
-                  </div>
-              </div>
-          </div>
-      </body>
-      </html>`);
     const __dirname = path.resolve();
-    res.sendFile(__dirname + "/reset.html");
+    if (!user) {
+      const templatePath = path.join(__dirname, "./template/error.html");
+      const source = fs.readFileSync(templatePath, { encoding: "utf-8" });
+      const template = Handlebars.compile(source);
+      const html = template({
+        TITLE: "Password reset token is invalid or has expired.",
+        MESSAGE: "Please reset your password once again.",
+      });
+      return res.send(html);
+    }
+    res.sendFile(__dirname, "./template/reset-password.html");
   } catch (err) {
     console.log(err);
     res
@@ -460,108 +346,39 @@ const resetPassword = async (req, res) => {
         status: "active",
       }
     );
-    if (!user)
-      return res.send(`<!DOCTYPE html>
-      <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <meta http-equiv="X-UA-Compatible" content="IE=edge">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Error</title>
-      </head>
-      <body>
-          <div style="display: flex;align-items: center;justify-content: center;">
-              <div style="width: 350px;">
-                  <div style="display: flex; flex-direction: column; align-items: center;padding-top: 80px;">
-                      <div style="display: flex; justify-content: center;">
-                          <img src="https://nika.shop/wp-content/uploads/2020/01/fail-png-7.png" width="120px">
-                      </div>
-                      <h2>Something Went Wrong!</h2>
-                      <p style="color: red;">Password reset token is invalid or has expired.</p>
-                      <p>Please reset your password once more.</p>
-                  </div>
-              </div>
-          </div>
-      </body>
-      </html>`);
+    const __dirname = path.resolve();
+    if (!user) {
+      const templatePath = path.join(__dirname, "./template/error.html");
+      const source = fs.readFileSync(templatePath, { encoding: "utf-8" });
+      const template = Handlebars.compile(source);
+      const html = template({
+        TITLE: "Password reset token is invalid or has expired.",
+        MESSAGE: "Please reset your password once again.",
+      });
+      return res.send(html);
+    }
+    let templatePath = path.join(__dirname, "./template/error.html");
+    let source = fs.readFileSync(templatePath, { encoding: "utf-8" });
+    let template = Handlebars.compile(source);
+    let html = template({
+      NAME: user.name,
+      EMAIL: user.email,
+    });
     const mailOptions = {
       from: `"no-reply" ${process.env.SMTP_USER_NAME}`,
       to: user.email,
       subject: "Your password has been changed",
-      html: `<!DOCTYPE html>
-      <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <meta http-equiv="X-UA-Compatible" content="IE=edge">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Password Changed</title>
-          <link rel="preconnect" href="https://fonts.googleapis.com">
-          <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-          <link href="https://fonts.googleapis.com/css2?family=Merriweather&family=Montserrat&family=Roboto&display=swap"
-              rel="stylesheet">
-      </head>
-      <body>
-          <center>
-              <div style="width: 350px">
-                  <header
-                      style="display: flex; flex-direction: row; align-items:center; border-bottom: solid #A5D7E8; border-width: thin;">
-                      <img src="https://play-lh.googleusercontent.com/asrfS4x89LkxFILsB4rYxFmX7n0K61MM0QEHpQ7GMlzfekHIeNLHxlP5dEbt1SstnFU=w240-h480"
-                          width="60px" height="50px" alt="GKV" />
-                      <p style="font-family: Merriweather; color: #002B5B;margin-left: 20px; font-weight: 600;">GKV<span>
-                              App</span></p>
-                  </header>
-                  <br />
-                  <div style="text-align: center;">
-                      <P style="text-align: left;">Hi ${user.name},</P>
-                      <p style="text-align: left;">This is a confirmation that the password for your account
-                          ${user.email} has just been changed.</p>
-                      <br />
-                  </div>
-                  <br />
-                  <div>
-                      <div style="display: flex; border-radius: 4px;">
-                          <div style="padding-left: 1%;">
-                              <P style="word-wrap: break-word; font-weight: 600;">Available on Playstore</P>
-                          </div>
-                          <a href='https://play.google.com/store/apps/details?id=com.gkv.gkvapp'
-                              style='cursor:pointer;display:block'><img
-                                  src='https://cdn.me-qr.com/qr/55920118.png?v=1681240451' style="overflow: hidden;"
-                                  width="160px" alt='Download app from Playstore'></a>
-                      </div>
-                  </div>
-                  <footer>
-                      <p style="font-size:x-small;">You have received this mail because your e-mail ID is registered with
-                          GKV-app. This is a system-generated e-mail, please don't reply to this message.</p>
-                  </footer>
-              </div>
-          </center>
-      </body>
-      </html>`,
+      html,
     };
     sendEmail(mailOptions);
-    res.send(`<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Success</title>
-    </head>
-    <body>
-        <div style="display: flex;align-items: center;justify-content: center;">
-            <div style="width: 350px;">
-                <div style="display: flex; flex-direction: column; align-items: center;padding-top: 80px;">
-                    <div style="display: flex; justify-content: center;">
-                        <img src="https://freepngimg.com/thumb/success/6-2-success-png-image.png" width="120px">
-                    </div>
-                    <h2>Successful!</h2>
-                    <p>Your Password has been Updated! Now, You are able to Login.</p>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>`);
+    templatePath = path.join(__dirname, "./template/success.html");
+    source = fs.readFileSync(templatePath, { encoding: "utf-8" });
+    template = Handlebars.compile(source);
+    html = template({
+      TITLE: "Your Password has been Updated!",
+      MESSAGE: "Now, You are able to Login.",
+    });
+    res.send(html);
   } catch (err) {
     console.log(err);
     res
@@ -578,7 +395,6 @@ export {
   recover,
   reset,
   resetPassword,
-  generateToken,
 };
 
 const generateToken = async (user) => {
