@@ -7,6 +7,7 @@ import Handlebars from "handlebars";
 import fs from "fs";
 
 import User from "../models/User.js";
+import Course from "../models/Course.js";
 import {
   logInBodyValidation,
   signUpBodyValidation,
@@ -22,23 +23,23 @@ const login = async (req, res) => {
     if (error)
       return res
         .status(400)
-        .json({ error: true, message: error.details[0].message });
+        .json({ status: "failure", message: error.details[0].message });
     const email = req.body.email.replace(/\s/g, "").toLowerCase();
 
     const user = await User.findOne({ email });
     if (!user)
       return res
         .status(401)
-        .json({ error: true, message: "No User found with given email" });
+        .json({ status: "failure", message: "No User found with given email" });
     if (!user.password)
       return res.status(400).json({
-        error: true,
+        status: "failure",
         message: `You signed up with Google. Please login using Google or continue using forgot Password`,
       });
 
     if (user.status != "active") {
       return res.status(401).send({
-        error: true,
+        status: "failure",
         message:
           "Pending Account. Please Verify Your Email or Continue with Google",
       });
@@ -51,21 +52,29 @@ const login = async (req, res) => {
     if (!verifiedPassword)
       return res
         .status(401)
-        .json({ error: true, message: "Invalid email or password" });
+        .json({ status: "failure", message: "Invalid email or password" });
 
+    const course = await Course.find({ students: user.id, activeClass: true });
+    if (course.length) {
+      return res.status(400).json({
+        status: "failure",
+        message: "login denied because active class found",
+      });
+    }
     const token = await generateToken(user);
 
     res.status(200).json({
-      error: false,
+      status: "success",
       token,
       user,
       message: "Logged in sucessfully",
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -78,19 +87,20 @@ const signUp = async (req, res) => {
     if (error)
       return res
         .status(400)
-        .json({ error: true, message: error.details[0].message });
+        .json({ status: "failure", message: error.details[0].message });
     const email = req.body.email.replace(/\s/g, "").toLowerCase();
     if (!/[a-zA-Z0-9+_.-]+@gkv.ac.in/.test(email))
       return res
         .status(400)
-        .json({ error: true, message: "Please use GKV mail" });
+        .json({ status: "failure", message: "Please use GKV mail" });
     const role = /^\d{8,9}@gkv\.ac\.in$/.test(email) ? "student" : "teacher";
     const registrationNo = role === "student" ? email.split("@")[0] : null;
     const oldUser = await User.findOne({ email });
     if (oldUser)
-      return res
-        .status(409)
-        .json({ error: true, message: "User with given email already exist" });
+      return res.status(409).json({
+        status: "failure",
+        message: "User with given email already exist",
+      });
     const name = req.body.name.trim();
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(req.body.password, salt);
@@ -125,14 +135,15 @@ const signUp = async (req, res) => {
     sendEmail(mailOptions);
 
     res.status(201).json({
-      error: false,
+      status: "success",
       message: "User was registered successfully! Please check your email",
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -146,7 +157,7 @@ const authWithGoogle = async (req, res) => {
       const verificationResponse = await verifyGoogleToken(req.body.credential);
       if (verificationResponse.error) {
         return res.status(400).json({
-          error: true,
+          status: "failure",
           message: verificationResponse.error,
         });
       }
@@ -160,7 +171,7 @@ const authWithGoogle = async (req, res) => {
       );
       if (!response.ok)
         return res.status(400).json({
-          error: true,
+          status: "failure",
           message: "Invalid user detected. Please try again",
         });
       profile = await response.json();
@@ -169,7 +180,7 @@ const authWithGoogle = async (req, res) => {
     if (!/[a-zA-Z0-9+_.-]+@gkv.ac.in/.test(email))
       return res
         .status(400)
-        .json({ error: true, message: "Please use GKV mail" });
+        .json({ status: "failure", message: "Please use GKV mail" });
     const role = /^\d{8,9}@gkv\.ac\.in$/.test(email) ? "student" : "teacher";
     const registrationNo = role === "student" ? email.split("@")[0] : null;
     const name = profile.name;
@@ -193,18 +204,26 @@ const authWithGoogle = async (req, res) => {
         { name, gId, profileImage, status: "active" }
       );
     }
+    const course = await Course.find({ students: user.id, activeClass: true });
+    if (course.length) {
+      return res.status(400).json({
+        status: "failure",
+        message: "login denied because active class found",
+      });
+    }
     const token = await generateToken(user);
     res.status(200).json({
-      error: false,
+      status: "success",
       token,
       user,
       message: "User Authenticated sucessfully",
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -241,9 +260,10 @@ const confirmAccount = async (req, res) => {
     res.send(html);
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -252,7 +272,9 @@ const confirmAccount = async (req, res) => {
 // @access Public
 const recover = async (req, res) => {
   if (!req.body.email)
-    return res.status(400).json({ error: true, message: "Email is missing" });
+    return res
+      .status(400)
+      .json({ status: "failure", message: "Email is missing" });
   const email = req.body.email.replace(/\s/g, "").toLowerCase();
   try {
     const resetPasswordToken = crypto.randomBytes(20).toString("hex");
@@ -266,7 +288,7 @@ const recover = async (req, res) => {
     if (!user) {
       return res
         .status(401)
-        .json({ error: true, message: "No User found with given email" });
+        .json({ status: "failure", message: "No User found with given email" });
     }
     const __dirname = path.resolve();
     const templatePath = path.join(
@@ -289,12 +311,13 @@ const recover = async (req, res) => {
     sendEmail(mailOptions);
     res
       .status(200)
-      .json({ error: false, message: "A reset email has been sent" });
+      .json({ status: "success", message: "A reset email has been sent" });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -321,9 +344,10 @@ const reset = async (req, res) => {
     res.sendFile(__dirname, "./template/reset-password.html");
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -381,9 +405,10 @@ const resetPassword = async (req, res) => {
     res.send(html);
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 

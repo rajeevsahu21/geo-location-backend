@@ -5,7 +5,7 @@ const limiter = rateLimit({
   max: 5, // Limit each IP to 5 requests per `window` (here, per 15 minutes)
   handler: (req, res /*next*/) => {
     return res.status(429).json({
-      error: true,
+      status: "failure",
       message: "You have exceeded the 5 requests in 15 mins limit!",
     });
   },

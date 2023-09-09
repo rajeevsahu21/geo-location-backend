@@ -9,19 +9,20 @@ const addMessage = async (req, res) => {
     if (!title || !message || !mongoose.Types.ObjectId.isValid(courseId))
       return res
         .status(400)
-        .json({ error: true, message: "Required field is missing" });
+        .json({ status: "failure", message: "Required field is missing" });
     const newMessage = await Message.create({ title, message, courseId });
     res.status(201).json({
       data: newMessage,
-      error: false,
+      status: "success",
       message: "Message Send successfully",
     });
     sendPushNotification(title, message, courseId);
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal server error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal server error",
+    });
   }
 };
 
@@ -31,22 +32,23 @@ const getMessage = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
-        .json({ error: true, message: "Message Id is not valid" });
+        .json({ status: "failure", message: "Message Id is not valid" });
     const message = await Message.findById(id);
     if (!message)
       return res
         .status(404)
-        .json({ error: true, message: "Message Not Found" });
+        .json({ status: "failure", message: "Message Not Found" });
     res.status(200).json({
       data: message,
-      error: false,
+      status: "success",
       message: "Message Found successfully",
     });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal server error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal server error",
+    });
   }
 };
 
@@ -64,14 +66,15 @@ const getMessages = async (req, res) => {
       total,
       pageCount: Math.ceil(total / limit),
       data: messages,
-      error: false,
+      status: "success",
       message: "All Messages found",
     });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal server error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal server error",
+    });
   }
 };
 
@@ -81,7 +84,7 @@ const updateMessage = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
-        .json({ error: true, message: "Message Id is not valid" });
+        .json({ status: "failure", message: "Message Id is not valid" });
     const { title, message } = req.body;
     const updatedMessage = await Message.findByIdAndUpdate(id, {
       title,
@@ -90,15 +93,16 @@ const updateMessage = async (req, res) => {
     if (!updatedMessage)
       return res
         .status(404)
-        .json({ error: true, message: "Message Not Found" });
+        .json({ status: "failure", message: "Message Not Found" });
     res
       .status(200)
-      .json({ error: false, message: "Message Updated successfully" });
+      .json({ status: "success", message: "Message Updated successfully" });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal server error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal server error",
+    });
   }
 };
 
@@ -108,20 +112,21 @@ const deleteMessage = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
-        .json({ error: true, message: "Message Id is not valid" });
+        .json({ status: "failure", message: "Message Id is not valid" });
     const deletedClass = await Message.findByIdAndDelete(id);
     if (!deletedClass)
       return res
         .status(404)
-        .json({ error: true, message: "Message not found" });
+        .json({ status: "failure", message: "Message not found" });
     res
       .status(200)
-      .json({ error: false, message: "Message deleted successfully" });
+      .json({ status: "success", message: "Message deleted successfully" });
   } catch (error) {
     console.error(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal server error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal server error",
+    });
   }
 };
 

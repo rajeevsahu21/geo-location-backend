@@ -9,16 +9,17 @@ const { version } = require("../package.json");
 const getUser = async (req, res) => {
   try {
     res.status(200).json({
-      error: false,
+      status: "success",
       data: req.user,
       version,
       message: "User Found Successfully",
     });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -26,14 +27,16 @@ const updateUser = async (req, res) => {
   try {
     const { name, profileImage, token } = req.body;
     await User.updateOne({ _id: req.user._id }, { name, profileImage, token });
-    res
-      .status(200)
-      .json({ error: false, message: "User Profile Updated successfully" });
+    res.status(200).json({
+      status: "success",
+      message: "User Profile Updated successfully",
+    });
   } catch (err) {
     console.log(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -57,14 +60,15 @@ const getUsers = async (req, res) => {
       total,
       pageCount: Math.ceil(total / limit),
       data: users,
-      error: false,
+      status: "success",
       message: "Users found Successfully",
     });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -74,18 +78,20 @@ const updateUsers = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(userId))
       return res
         .status(400)
-        .json({ error: true, message: "User Id is not valid" });
+        .json({ status: "failure", message: "User Id is not valid" });
     const user = await User.findByIdAndUpdate(userId, { name, email, role });
     if (!user)
-      return res.status(404).json({ error: true, message: "User not found" });
+      return res
+        .status(404)
+        .json({ status: "failure", message: "User not found" });
     res.status(200).json({
-      error: false,
+      status: "success",
       message: "User Profile Updated Successfully",
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      error: true,
+      status: "failure",
       message: err.message || "Internal Server Error",
     });
   }
@@ -97,7 +103,7 @@ const getUserCourses = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(userId))
       return res
         .status(400)
-        .json({ error: true, message: "User Id is not valid" });
+        .json({ status: "failure", message: "User Id is not valid" });
     let query = {
       students: userId,
     };
@@ -108,15 +114,16 @@ const getUserCourses = async (req, res) => {
     }
     const courses = await Course.find(query);
     res.status(200).json({
-      error: false,
+      status: "success",
       data: courses,
       message: "Courses Found Successfully",
     });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ error: true, message: err.message || "Internal Server Error" });
+    res.status(500).json({
+      status: "failure",
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 

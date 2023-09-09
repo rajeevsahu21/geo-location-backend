@@ -48,7 +48,9 @@ app.use(
 );
 
 app.get("/api", (req, res) => {
-  res.status(200).json({ error: false, message: "API is working", version });
+  res
+    .status(200)
+    .json({ status: "success", message: "API is working", version });
 });
 
 app.use("/api/auth", authRoutes);
