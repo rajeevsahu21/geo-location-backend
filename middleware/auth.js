@@ -25,6 +25,8 @@ const auth = async (req, res, next) => {
         message: "The user belonging to this token does no longer exist.",
       });
     req.user = currentUser;
+    currentUser.lastActivity = new Date();
+    currentUser.save();
     next();
   } catch (err) {
     console.log(err);
