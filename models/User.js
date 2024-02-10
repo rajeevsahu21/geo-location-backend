@@ -27,6 +27,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       max: 255,
     },
+    parentEmail: {
+      type: String,
+    },
+    parentPhone: {
+      type: String,
+    },
     registrationNo: {
       type: String,
     },

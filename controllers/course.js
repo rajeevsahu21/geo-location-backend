@@ -43,7 +43,7 @@ const getCourses = async (req, res) => {
       req.user.role === "student"
         ? { students: req.user._id }
         : { teacher: req.user._id };
-    const courses = await Course.find(query);
+    const courses = await Course.find(query).sort({ createdAt: -1 });
     res.status(200).json({
       status: "success",
       data: courses,
@@ -105,7 +105,7 @@ const enrollCourse = async (req, res) => {
 const updateCourse = async (req, res) => {
   try {
     const { id } = req.params;
-    const { students, toggle } = req.body;
+    const { courseName, students, toggle } = req.body;
     if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
@@ -117,6 +117,7 @@ const updateCourse = async (req, res) => {
       update = {
         $pull: { students: { $in: students } },
         isActive: toggle,
+        courseName,
       };
     }
     const updatedCourse = await Course.findByIdAndUpdate(id, update);
@@ -127,7 +128,9 @@ const updateCourse = async (req, res) => {
     res.status(200).json({
       status: "success",
       message:
-        toggle !== undefined && req.user.role != "student"
+        courseName !== undefined
+          ? "Course Name update Successfully"
+          : toggle !== undefined && req.user.role != "student"
           ? `Course Enrollment ${toggle ? "Started" : "Closed"} successfully`
           : "Student removed Successfully",
     });
