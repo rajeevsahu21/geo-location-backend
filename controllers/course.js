@@ -284,7 +284,7 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
         return res
           .status(400)
           .json({ status: "failure", message: "File not found" });
-      const courseId = fields.courseId;
+      const courseId = fields.courseId[0];
       if (!mongoose.Types.ObjectId.isValid(courseId))
         return res
           .status(400)
@@ -301,7 +301,7 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
       res
         .status(200)
         .json({ status: "success", message: "Email sent to everyone" });
-      const { oldUsers, newUsers } = await readExcel(f.filepath);
+      const { oldUsers, newUsers } = await readExcel(f[0].filepath);
       const allUsers = [...oldUsers, ...newUsers];
       const studentIds = allUsers.map((student) => student._id);
       await Course.updateOne(

@@ -42,6 +42,7 @@ const readExcel = async (file) => {
         const newUser = await User.create({
           email,
           name,
+          role: "student",
           parentEmail,
           parentPhone,
           registrationNo: email.split("@")[0],
