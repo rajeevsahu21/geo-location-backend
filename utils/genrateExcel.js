@@ -29,13 +29,22 @@ const readExcel = async (file) => {
   for (let i = 1; i <= length; i++) {
     const email = worksheet[`A${i}`].v.replace(/\s/g, "").toLowerCase();
     if (worksheet[`A${i}`] && /^\d{8,9}@gkv\.ac\.in$/.test(email)) {
-      const oldUser = await User.findOne({ email }, { email: 1, name: 1 });
+      const name = worksheet[`B${i}`]?.v;
+      const parentEmail = worksheet[`C${i}`]?.v;
+      const parentPhone = worksheet[`D${i}`]?.v;
+      const oldUser = await User.findOneAndUpdate(
+        { email },
+        { name, parentEmail, parentPhone }
+      );
       if (oldUser) {
         oldUsers.push(oldUser);
       } else {
         const newUser = await User.create({
           email,
-          name: worksheet[`B${i}`]?.v,
+          name,
+          role: "student",
+          parentEmail,
+          parentPhone,
           registrationNo: email.split("@")[0],
         });
         newUsers.push(newUser);

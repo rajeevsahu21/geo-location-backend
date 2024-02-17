@@ -43,7 +43,7 @@ const getCourses = async (req, res) => {
       req.user.role === "student"
         ? { students: req.user._id }
         : { teacher: req.user._id };
-    const courses = await Course.find(query);
+    const courses = await Course.find(query).sort({ createdAt: -1 });
     res.status(200).json({
       status: "success",
       data: courses,
@@ -105,7 +105,7 @@ const enrollCourse = async (req, res) => {
 const updateCourse = async (req, res) => {
   try {
     const { id } = req.params;
-    const { students, toggle } = req.body;
+    const { courseName, students, toggle } = req.body;
     if (!mongoose.Types.ObjectId.isValid(id))
       return res
         .status(400)
@@ -117,6 +117,7 @@ const updateCourse = async (req, res) => {
       update = {
         $pull: { students: { $in: students } },
         isActive: toggle,
+        courseName,
       };
     }
     const updatedCourse = await Course.findByIdAndUpdate(id, update);
@@ -127,9 +128,9 @@ const updateCourse = async (req, res) => {
     res.status(200).json({
       status: "success",
       message:
-        toggle !== undefined && req.user.role != "student"
-          ? `Course Enrollment ${toggle ? "Started" : "Closed"} successfully`
-          : "Student removed Successfully",
+        students || req.user.role == "student"
+          ? "Student removed successfully"
+          : "Course updated successfully",
     });
   } catch (err) {
     console.log(err);
@@ -281,7 +282,7 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
         return res
           .status(400)
           .json({ status: "failure", message: "File not found" });
-      const courseId = fields.courseId;
+      const courseId = fields.courseId[0];
       if (!mongoose.Types.ObjectId.isValid(courseId))
         return res
           .status(400)
@@ -298,7 +299,7 @@ const inviteStudentsToEnrollCourse = async (req, res) => {
       res
         .status(200)
         .json({ status: "success", message: "Email sent to everyone" });
-      const { oldUsers, newUsers } = await readExcel(f.filepath);
+      const { oldUsers, newUsers } = await readExcel(f[0].filepath);
       const allUsers = [...oldUsers, ...newUsers];
       const studentIds = allUsers.map((student) => student._id);
       await Course.updateOne(
