@@ -128,11 +128,9 @@ const updateCourse = async (req, res) => {
     res.status(200).json({
       status: "success",
       message:
-        courseName !== undefined
-          ? "Course Name update Successfully"
-          : toggle !== undefined && req.user.role != "student"
-          ? `Course Enrollment ${toggle ? "Started" : "Closed"} successfully`
-          : "Student removed Successfully",
+        students || req.user.role == "student"
+          ? "Student removed successfully"
+          : "Course updated successfully",
     });
   } catch (err) {
     console.log(err);
