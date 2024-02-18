@@ -4,6 +4,9 @@ import Class from "../models/Class.js";
 import Course from "../models/Course.js";
 import { sendPushNotification } from "../utils/sendNotification.js";
 
+// @route POST api/class
+// @desc Start Class
+// @access Teacher
 const startClass = async (req, res) => {
   try {
     const { courseId, location, radius } = req.body;
@@ -21,17 +24,16 @@ const startClass = async (req, res) => {
       return res
         .status(400)
         .json({ status: "failure", message: "Already Have a running class" });
-    const newClass = await new Class({
+    await Class.create({
       courseId,
       location,
       radius,
-    }).save();
+    });
     closeClass(courseId);
     sendPushNotification("New class Started", "Mark your Attendance", courseId);
     await Course.updateOne({ _id: courseId }, { activeClass: true, radius });
     res.status(201).json({
       status: "success",
-      data: newClass,
       message: "Class Started successfully",
     });
   } catch (err) {
@@ -43,6 +45,9 @@ const startClass = async (req, res) => {
   }
 };
 
+// @route PUT api/class/:id
+// @desc Update Class
+// @access Teacher
 const updateClass = async (req, res) => {
   try {
     const { id } = req.params;
@@ -55,7 +60,7 @@ const updateClass = async (req, res) => {
     const unMark = [];
     if (students[0]["_id"]) {
       students.forEach((student) => {
-        if (student.present) {
+        if (student.present === "true" || student.present === true) {
           mark.push(student._id);
         } else {
           unMark.push(student._id);
@@ -64,6 +69,9 @@ const updateClass = async (req, res) => {
     } else {
       mark = students;
     }
+    res
+      .status(200)
+      .json({ status: "success", message: "Attendance updated Successfully" });
     await Class.updateOne(
       { _id: id },
       {
@@ -76,9 +84,6 @@ const updateClass = async (req, res) => {
         $pull: { students: { $in: unMark } },
       }
     );
-    res
-      .status(200)
-      .json({ status: "success", message: "Attendance updated Successfully" });
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -88,6 +93,9 @@ const updateClass = async (req, res) => {
   }
 };
 
+// @route PUT api/class
+// @desc Mark Attendance
+// @access Private
 const markAttendance = async (req, res) => {
   try {
     const { courseId } = req.body;
@@ -122,11 +130,7 @@ const markAttendance = async (req, res) => {
         .status(404)
         .json({ status: "failure", message: "No running class found" });
     const classId = runningClass._id;
-    const studentClass = await Class.findOne({
-      _id: classId,
-      students: studentId,
-    });
-    if (studentClass)
+    if (runningClass.students.includes(studentId))
       return res.status(400).json({
         status: "failure",
         message: "Student already marked Attendance",
@@ -153,9 +157,12 @@ const markAttendance = async (req, res) => {
         .status(400)
         .json({ status: "failure", message: "You are too far from class" });
     }
-    await Class.findByIdAndUpdate(classId, {
-      $addToSet: { students: studentId },
-    });
+    await Class.updateOne(
+      { _id: classId },
+      {
+        $addToSet: { students: studentId },
+      }
+    );
     res.status(200).json({
       status: "success",
       message: "Class Attendance marked successfully",
@@ -169,6 +176,9 @@ const markAttendance = async (req, res) => {
   }
 };
 
+// @route GET api/class
+// @desc Get Classes
+// @access Private
 const getClassesByCourseId = async (req, res) => {
   try {
     const { courseId } = req.query;
@@ -195,6 +205,9 @@ const getClassesByCourseId = async (req, res) => {
   }
 };
 
+// @route GET api/class/students
+// @desc Get all students with present in Class
+// @access Teacher
 const getClass = async (req, res) => {
   try {
     const { classId } = req.query;
@@ -237,6 +250,9 @@ const getClass = async (req, res) => {
   }
 };
 
+// @route GET api/class/:id
+// @desc Get Class
+// @access Teacher
 const getClassById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -267,6 +283,9 @@ const getClassById = async (req, res) => {
   }
 };
 
+// @route DELETE api/class/:id
+// @desc Delete Class
+// @access Teacher
 const deleteClassById = async (req, res) => {
   try {
     const { id } = req.params;

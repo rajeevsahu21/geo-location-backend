@@ -6,6 +6,9 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const { version } = require("../package.json");
 
+// @route GET api/user/me
+// @desc Get User
+// @access Private
 const getUser = async (req, res) => {
   try {
     res.status(200).json({
@@ -23,6 +26,9 @@ const getUser = async (req, res) => {
   }
 };
 
+// @route PUT api/user
+// @desc Update User
+// @access Private
 const updateUser = async (req, res) => {
   try {
     const { name, profileImage, token } = req.body;
@@ -40,9 +46,12 @@ const updateUser = async (req, res) => {
   }
 };
 
+// @route GET api/user
+// @desc Get User
+// @access Admin
 const getUsers = async (req, res) => {
   try {
-    const { pageNumber, limit, searchTerm = "" } = req.query;
+    const { pageNumber = 1, limit = 15, searchTerm = "" } = req.query;
     const skip = (pageNumber - 1) * limit;
     const query = {
       $or: [
@@ -72,6 +81,9 @@ const getUsers = async (req, res) => {
   }
 };
 
+// @route PUT api/user/detail
+// @desc Update User
+// @access Admin
 const updateUsers = async (req, res) => {
   try {
     const { userId, name, email, role } = req.body;
@@ -97,6 +109,9 @@ const updateUsers = async (req, res) => {
   }
 };
 
+// @route GET api/user/courses
+// @desc Get User Courses
+// @access Admin
 const getUserCourses = async (req, res) => {
   try {
     const { userId, role } = req.query;

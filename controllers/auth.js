@@ -189,7 +189,7 @@ const authWithGoogle = async (req, res) => {
     let user = await User.findOne({ email });
 
     if (!user) {
-      user = await new User({
+      user = await User.create({
         name,
         email,
         gId,
@@ -197,7 +197,7 @@ const authWithGoogle = async (req, res) => {
         role,
         status: "active",
         registrationNo,
-      }).save();
+      });
     } else if (!user.gId) {
       await User.updateOne(
         { email },
@@ -227,7 +227,7 @@ const authWithGoogle = async (req, res) => {
   }
 };
 
-// @route POST api/auth/confirm/:token
+// @route GET api/auth/confirm/:token
 // @desc verify the user account
 // @access Public
 const confirmAccount = async (req, res) => {

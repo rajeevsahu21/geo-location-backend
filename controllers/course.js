@@ -8,8 +8,11 @@ import Class from "../models/Class.js";
 import Course from "../models/Course.js";
 import { exportToExcel, readExcel } from "../utils/genrateExcel.js";
 import sendEmail from "../utils/sendEmail.js";
-import Message from "../models/message.js";
+import Message from "../models/Message.js";
 
+// @route POST api/course
+// @desc Create Course
+// @access Teacher
 const createCourse = async (req, res) => {
   try {
     if (!req.body.courseName)
@@ -37,6 +40,9 @@ const createCourse = async (req, res) => {
   }
 };
 
+// @route GET api/course
+// @desc Get Courses
+// @access Private
 const getCourses = async (req, res) => {
   try {
     const query =
@@ -58,6 +64,9 @@ const getCourses = async (req, res) => {
   }
 };
 
+// @route POST api/course/enroll
+// @desc Enroll into a Course
+// @access Private
 const enrollCourse = async (req, res) => {
   try {
     if (!req.body.courseCode)
@@ -75,24 +84,18 @@ const enrollCourse = async (req, res) => {
       return res
         .status(400)
         .json({ status: "failure", message: "Course closed for enrollment" });
-    const studentCourse = await Course.findOne({
-      courseCode,
-      students: studentId,
-    });
-    if (studentCourse)
+    if (course.students.includes(studentId))
       return res
-        .status(400)
+        .status(409)
         .json({ status: "failure", message: "Student already enrolled" });
-    const enrolledCourse = await Course.findOneAndUpdate(
-      { courseCode },
-      { $addToSet: { students: studentId } },
-      { new: true }
-    );
     res.status(200).json({
       status: "success",
-      data: enrolledCourse,
       message: "Course Enrollment Done",
     });
+    await Course.updateOne(
+      { courseCode },
+      { $addToSet: { students: studentId } }
+    );
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -102,6 +105,9 @@ const enrollCourse = async (req, res) => {
   }
 };
 
+// @route PUT api/course/:id
+// @desc Update Course
+// @access Private
 const updateCourse = async (req, res) => {
   try {
     const { id } = req.params;
@@ -128,7 +134,7 @@ const updateCourse = async (req, res) => {
     res.status(200).json({
       status: "success",
       message:
-        students || req.user.role == "student"
+        students.length || req.user.role == "student"
           ? "Student removed successfully"
           : "Course updated successfully",
     });
@@ -141,6 +147,9 @@ const updateCourse = async (req, res) => {
   }
 };
 
+// @route GET api/course/:id
+// @desc Get Course
+// @access Teacher
 const getCourseById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -170,6 +179,9 @@ const getCourseById = async (req, res) => {
   }
 };
 
+// @route DELETE api/course/:id
+// @desc Delete Course
+// @access Teacher
 const deleteCourseById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -182,11 +194,11 @@ const deleteCourseById = async (req, res) => {
       return res
         .status(404)
         .json({ status: "failure", message: "Course not found" });
-    await Class.deleteMany({ courseId: id });
-    await Message.deleteMany({ courseId: id });
     res
       .status(200)
       .json({ status: "success", message: "Course deleted successfully" });
+    await Class.deleteMany({ courseId: id });
+    await Message.deleteMany({ courseId: id });
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -196,6 +208,9 @@ const deleteCourseById = async (req, res) => {
   }
 };
 
+// @route POST api/course/attendance
+// @desc Send Course to teacher email
+// @access Teacher
 const sendAttendanceViaEmail = async (req, res) => {
   try {
     const { courseId } = req.query;
@@ -260,7 +275,7 @@ const sendAttendanceViaEmail = async (req, res) => {
         },
       ],
     };
-    await sendEmail(mailOptions);
+    sendEmail(mailOptions);
     res.status(200).json({
       status: "success",
       message: "Attendance sent successfully to registered Email",
@@ -274,6 +289,9 @@ const sendAttendanceViaEmail = async (req, res) => {
   }
 };
 
+// @route POST api/course/invite
+// @desc Enroll students into Course
+// @access Teacher
 const inviteStudentsToEnrollCourse = async (req, res) => {
   try {
     const form = formidable({ multiples: true });
