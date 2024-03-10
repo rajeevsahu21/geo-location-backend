@@ -1,8 +1,11 @@
 import mongoose from "mongoose";
 
-import Message from "../models/message.js";
+import Message from "../models/Message.js";
 import { sendPushNotification } from "../utils/sendNotification.js";
 
+// @route POST api/message
+// @desc Create Message
+// @access Teacher
 const addMessage = async (req, res) => {
   try {
     const { title, message, courseId } = req.body;
@@ -10,9 +13,8 @@ const addMessage = async (req, res) => {
       return res
         .status(400)
         .json({ status: "failure", message: "Required field is missing" });
-    const newMessage = await Message.create({ title, message, courseId });
+    await Message.create({ title, message, courseId });
     res.status(201).json({
-      data: newMessage,
       status: "success",
       message: "Message Send successfully",
     });
@@ -26,6 +28,9 @@ const addMessage = async (req, res) => {
   }
 };
 
+// @route GET api/message/:id
+// @desc Get Message
+// @access Teacher
 const getMessage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -52,9 +57,12 @@ const getMessage = async (req, res) => {
   }
 };
 
+// @route GET api/message
+// @desc Get Messages
+// @access Private
 const getMessages = async (req, res) => {
   try {
-    const { pageNumber, limit, searchTerm = "", courseId } = req.query;
+    const { pageNumber = 1, limit = 15, searchTerm = "", courseId } = req.query;
     const skip = (pageNumber - 1) * limit;
     const query = {
       title: { $regex: searchTerm, $options: "i" },
@@ -78,6 +86,9 @@ const getMessages = async (req, res) => {
   }
 };
 
+// @route PUT api/message/:id
+// @desc Update Message
+// @access Teacher
 const updateMessage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -106,6 +117,9 @@ const updateMessage = async (req, res) => {
   }
 };
 
+// @route DELETE api/message/:id
+// @desc Delete Message
+// @access Teacher
 const deleteMessage = async (req, res) => {
   try {
     const { id } = req.params;
