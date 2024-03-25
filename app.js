@@ -53,6 +53,8 @@ app.get("/api", (req, res) => {
     .json({ status: "success", message: "API is working", version });
 });
 
+import "./attendanceReportCorn.js";
+
 app.use("/api/auth", authRoutes);
 app.use(authMiddleWare);
 app.use("/api/class", classRoutes);
