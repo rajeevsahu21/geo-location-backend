@@ -134,7 +134,7 @@ const updateCourse = async (req, res) => {
     res.status(200).json({
       status: "success",
       message:
-        students.length || req.user.role == "student"
+        students?.length || req.user.role == "student"
           ? "Student removed successfully"
           : "Course updated successfully",
     });

@@ -1,5 +1,4 @@
 import cron from "node-cron";
-import validator from "validator";
 
 import Class from "./models/Class.js";
 import Course from "./models/Course.js";
