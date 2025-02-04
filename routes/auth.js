@@ -13,11 +13,12 @@ import { limiter } from "../middleware/rateLimiter.js";
 
 const router = Router();
 
-router.post("/login", limiter, login);
+router.use(limiter);
+router.post("/login", login);
 router.post("/signUp", signUp);
 router.post("/google", authWithGoogle);
 router.get("/confirm/:token", confirmAccount);
-router.post("/recover", limiter, recover);
-router.route("/reset/:token").get(limiter, reset).post(resetPassword);
+router.post("/recover", recover);
+router.route("/reset/:token").get(reset).post(resetPassword);
 
 export default router;
