@@ -341,7 +341,7 @@ const reset = async (req, res) => {
       });
       return res.send(html);
     }
-    res.sendFile(__dirname, "./template/reset-password.html");
+    res.sendFile(path.join(__dirname, "./template/reset-password.html"));
   } catch (err) {
     console.log(err);
     res.status(500).json({
