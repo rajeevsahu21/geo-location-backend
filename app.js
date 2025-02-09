@@ -1,6 +1,5 @@
-import "./instrument";
-
 import express from "express";
+import * as Sentry from "@sentry/node";
 import "dotenv/config";
 import cors from "cors";
 import morgan from "morgan";
@@ -8,6 +7,7 @@ import path from "path";
 import fs from "fs";
 import { createRequire } from "node:module";
 
+import "./instrument.js";
 import dbConnect from "./config/dbConnect.js";
 import authRoutes from "./routes/auth.js";
 import authMiddleWare from "./middleware/auth.js";
@@ -22,9 +22,6 @@ const { version } = require("./package.json");
 const app = express();
 
 dbConnect();
-
-Sentry.setupExpressErrorHandler(app);
-
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -65,6 +62,8 @@ app.use("/api/class", classRoutes);
 app.use("/api/course", courseRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
+
+Sentry.setupExpressErrorHandler(app);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Server Listening on port ${port}...`));
