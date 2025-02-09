@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 Sentry.init({
+  environment: process.env.NODE_ENV,
   dsn: process.env.SENTRY_DSN,
   integrations: [nodeProfilingIntegration()],
   // Add Tracing by setting tracesSampleRate
