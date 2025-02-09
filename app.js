@@ -1,3 +1,5 @@
+import "./instrument";
+
 import express from "express";
 import "dotenv/config";
 import cors from "cors";
@@ -20,6 +22,8 @@ const { version } = require("./package.json");
 const app = express();
 
 dbConnect();
+
+Sentry.setupExpressErrorHandler(app);
 
 app.use(cors());
 app.use(express.json());
