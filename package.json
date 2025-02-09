@@ -24,6 +24,8 @@
   },
   "homepage": "https://github.com/rajeevsahu21/geo-location-backend#readme",
   "dependencies": {
+    "@sentry/node": "^8.54.0",
+    "@sentry/profiling-node": "^8.54.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
