@@ -1,6 +1,5 @@
-// Import with `import * as Sentry from "@sentry/node"` if you are using ESM
-import * as Sentry from "@sentry/node";
-import { nodeProfilingIntegration } from "@sentry/profiling-node";
+const Sentry = await import("@sentry/node");
+const { nodeProfilingIntegration } = await import("@sentry/profiling-node");
 
 Sentry.init({
   environment: process.env.NODE_ENV,
