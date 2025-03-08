@@ -381,7 +381,10 @@ const resetPassword = async (req, res) => {
       });
       return res.send(html);
     }
-    let templatePath = path.join(__dirname, "./template/error.html");
+    let templatePath = path.join(
+      __dirname,
+      "./template/password-change-confirmation.html"
+    );
     let source = fs.readFileSync(templatePath, { encoding: "utf-8" });
     let template = Handlebars.compile(source);
     let html = template({

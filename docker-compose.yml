@@ -1,0 +1,24 @@
+services:
+  app:
+    depends_on:
+      - mongo
+    image: gkv
+    restart: always
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+      MONGO_URL: mongodb://mongo:27017/gkv
+      ACCESS_TOKEN_PRIVATE_KEY: 123456789
+    ports:
+      - 5000:5000
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017
+    volumes:
+      - mongo:/data/db
+volumes:
+  mongo:
